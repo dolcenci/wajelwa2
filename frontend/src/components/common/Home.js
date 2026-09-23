@@ -4,10 +4,8 @@ import { productService } from '../../services/api';
 
 const Home = () => {
     const navigate = useNavigate();
-    const [featuredProducts, setFeaturedProducts] = useState([]);
-    const [newArrivals, setNewArrivals] = useState([]);
+    const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
     const isAuthenticated = !!localStorage.getItem('token');
 
     useEffect(() => {
@@ -18,22 +16,14 @@ const Home = () => {
         try {
             setLoading(true);
             const response = await productService.getAll();
-            const products = response.data || [];
-
-            // Get first 4 products as featured
-            setFeaturedProducts(products.slice(0, 4));
-
-            // Get next 4 products as new arrivals
-            setNewArrivals(products.slice(4, 8));
+            setProducts(response.data || []);
         } catch (err) {
-            setError('Failed to load products');
             console.error(err);
         } finally {
             setLoading(false);
         }
     };
 
-    // Helper function to safely format price
     const formatPrice = (price) => {
         if (price === undefined || price === null) return '0.00';
         const numPrice = typeof price === 'string' ? parseFloat(price) : price;
@@ -41,262 +31,234 @@ const Home = () => {
     };
 
     return (
-        <div className="home-page">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
             {/* Hero Section */}
-            <section className="hero-section">
-                <div className="hero-content">
-                    <div className="hero-text">
-                        <span className="hero-badge">Premium Quality</span>
-                        <h1>Designer Printed <br />T-Shirts & Hoodies</h1>
-                        <p className="hero-description">
-                            Discover our exclusive collection of premium designer prints.
-                            Each piece is crafted with attention to detail and made to last.
-                            Elevate your wardrobe with unique designs you won't find anywhere else.
+            <div className="bg-gradient-to-r from-purple-700 to-indigo-700 dark:from-purple-900 dark:to-indigo-900">
+                <div className="max-w-6xl mx-auto px-6 py-24">
+                    <div className="text-center">
+                        <p className="text-purple-200 text-sm font-semibold uppercase tracking-widest mb-4">
+                            Premium Quality
                         </p>
-                        <div className="hero-buttons">
-                            <Link to="/products" className="hero-btn primary">
+                        <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+                            Designer Printed T-Shirts & Hoodies
+                        </h1>
+                        <p className="text-lg text-purple-100 max-w-2xl mx-auto mb-10">
+                            Discover our exclusive collection of premium designer prints. 
+                            Each piece is crafted with attention to detail and made to last.
+                        </p>
+                        <div className="flex flex-wrap justify-center gap-4">
+                            <Link 
+                                to="/products" 
+                                className="bg-white text-purple-700 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors"
+                            >
                                 Shop Now
-                                <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                </svg>
                             </Link>
                             {!isAuthenticated && (
-                                <Link to="/register" className="hero-btn secondary">
+                                <Link 
+                                    to="/register" 
+                                    className="border-2 border-white text-white px-8 py-3 rounded-full font-semibold hover:bg-white hover:text-purple-700 transition-colors"
+                                >
                                     Join Wajelwa
                                 </Link>
                             )}
                         </div>
-                        <div className="hero-stats">
-                            <div className="stat-item">
-                                <span className="stat-number">500+</span>
-                                <span className="stat-label">Happy Customers</span>
-                            </div>
-                            <div className="stat-item">
-                                <span className="stat-number">100+</span>
-                                <span className="stat-label">Unique Designs</span>
-                            </div>
-                            <div className="stat-item">
-                                <span className="stat-number">98%</span>
-                                <span className="stat-label">Satisfaction Rate</span>
-                            </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Stats Bar */}
+            <div className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+                <div className="max-w-6xl mx-auto px-6 py-8">
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                            <p className="text-2xl md:text-3xl font-bold text-purple-600 dark:text-purple-400">
+                                500+
+                            </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Happy Customers
+                            </p>
                         </div>
-                    </div>
-                    <div className="hero-image">
-                        <div className="hero-image-placeholder">
-                            <span className="hero-image-icon">👕</span>
-                            <span className="hero-image-text">Premium Quality</span>
-                            <div className="floating-tag tag-1">🔥 New Drop</div>
-                            <div className="floating-tag tag-2">💯 Premium</div>
-                            <div className="floating-tag tag-3">✨ Limited</div>
+                        <div>
+                            <p className="text-2xl md:text-3xl font-bold text-purple-600 dark:text-purple-400">
+                                100+
+                            </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Unique Designs
+                            </p>
                         </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Featured Products Section */}
-            <section className="featured-section">
-                <div className="section-header">
-                    <div className="section-header-content">
-                        <span className="section-tag">Featured</span>
-                        <h2>Best Sellers</h2>
-                        <p className="section-description">
-                            Our most popular designs loved by customers worldwide
-                        </p>
-                    </div>
-                    <Link to="/products" className="view-all-btn">
-                        View All
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
-                    </Link>
-                </div>
-
-                {loading ? (
-                    <div className="loading">Loading products...</div>
-                ) : error ? (
-                    <div className="error-message">{error}</div>
-                ) : (
-                    <div className="product-grid-home">
-                        {featuredProducts.map((product) => (
-                            <div
-                                key={product.product_id}
-                                className="product-card-home"
-                                onClick={() => navigate(`/product/${product.product_id}`)}
-                            >
-                                <div className="product-image-home">
-                                    <img
-                                        src={`https://via.placeholder.com/400x400/667eea/ffffff?text=${product.product_name ? product.product_name.substring(0, 8) : 'Product'}`}
-                                        alt={product.product_name || 'Product'}
-                                    />
-                                    {product.stock_quantity > 0 && (
-                                        <span className="product-badge">In Stock</span>
-                                    )}
-                                    <button
-                                        className="quick-view-btn"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            navigate(`/product/${product.product_id}`);
-                                        }}
-                                    >
-                                        Quick View
-                                    </button>
-                                </div>
-                                <div className="product-info-home">
-                                    <h3>{product.product_name || 'Unnamed Product'}</h3>
-                                    <div className="product-meta">
-                                        <span className="product-price-home">
-                                            ${formatPrice(product.price)}
-                                        </span>
-                                        <div className="product-rating">
-                                            <span className="stars">★★★★★</span>
-                                            <span className="rating-count">(24)</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </section>
-
-            {/* Features Section */}
-            <section className="features-section">
-                <div className="features-grid">
-                    <div className="feature-card">
-                        <div className="feature-icon">🚚</div>
-                        <h3>Free Shipping</h3>
-                        <p>On orders over R500. Fast and reliable delivery across South Africa.</p>
-                    </div>
-                    <div className="feature-card">
-                        <div className="feature-icon">🔄</div>
-                        <h3>Easy Returns</h3>
-                        <p>Not satisfied? Return within 30 days for a full refund.</p>
-                    </div>
-                    <div className="feature-card">
-                        <div className="feature-icon">🔒</div>
-                        <h3>Secure Payment</h3>
-                        <p>Your payment information is protected with industry-standard encryption.</p>
-                    </div>
-                    <div className="feature-card">
-                        <div className="feature-icon">💎</div>
-                        <h3>Premium Quality</h3>
-                        <p>All products are made with premium materials and exceptional craftsmanship.</p>
-                    </div>
-                </div>
-            </section>
-
-            {/* New Arrivals Section */}
-            <section className="new-arrivals-section">
-                <div className="section-header">
-                    <div className="section-header-content">
-                        <span className="section-tag">New</span>
-                        <h2>Just Dropped</h2>
-                        <p className="section-description">
-                            Fresh designs added to our collection. Be the first to style them.
-                        </p>
-                    </div>
-                    <Link to="/products" className="view-all-btn">
-                        View All
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
-                    </Link>
-                </div>
-
-                {loading ? (
-                    <div className="loading">Loading products...</div>
-                ) : (
-                    <div className="product-grid-home">
-                        {newArrivals.map((product) => (
-                            <div
-                                key={product.product_id}
-                                className="product-card-home"
-                                onClick={() => navigate(`/product/${product.product_id}`)}
-                            >
-                                <div className="product-image-home">
-                                    <img
-                                        src={`https://via.placeholder.com/400x400/764ba2/ffffff?text=${product.product_name ? product.product_name.substring(0, 8) : 'Product'}`}
-                                        alt={product.product_name || 'Product'}
-                                    />
-                                    <span className="product-badge new-badge">New</span>
-                                    <button
-                                        className="quick-view-btn"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            navigate(`/product/${product.product_id}`);
-                                        }}
-                                    >
-                                        Quick View
-                                    </button>
-                                </div>
-                                <div className="product-info-home">
-                                    <h3>{product.product_name || 'Unnamed Product'}</h3>
-                                    <div className="product-meta">
-                                        <span className="product-price-home">
-                                            ${formatPrice(product.price)}
-                                        </span>
-                                        <div className="product-rating">
-                                            <span className="stars">★★★★☆</span>
-                                            <span className="rating-count">(12)</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-            </section>
-
-            {/* Call to Action Section */}
-            <section className="cta-section">
-                <div className="cta-content">
-                    <div className="cta-text">
-                        <span className="cta-badge">Join the Community</span>
-                        <h2>Ready to Upgrade Your Style?</h2>
-                        <p>
-                            Join thousands of satisfied customers who've discovered
-                            the perfect blend of comfort and style with Wajelwa.
-                        </p>
-                        <Link to="/products" className="cta-btn">
-                            Explore Collection
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                            </svg>
-                        </Link>
-                    </div>
-                    <div className="cta-image">
-                        <div className="cta-image-placeholder">
-                            <span className="cta-image-icon">👕</span>
-                            <span className="cta-image-text">Wajelwa</span>
-                            <span className="cta-image-sub">Designer Prints</span>
+                        <div>
+                            <p className="text-2xl md:text-3xl font-bold text-purple-600 dark:text-purple-400">
+                                98%
+                            </p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Satisfaction Rate
+                            </p>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
 
-            {/* Newsletter Section */}
-            <section className="newsletter-section">
-                <div className="newsletter-content">
-                    <div className="newsletter-icon">✉️</div>
-                    <h2>Stay in the Loop</h2>
-                    <p>
-                        Subscribe to get exclusive offers, early access to new drops,
-                        and style inspiration delivered to your inbox.
+            {/* Featured Products */}
+            <div className="max-w-6xl mx-auto px-6 py-16">
+                <div className="text-center mb-12">
+                    <p className="text-purple-600 dark:text-purple-400 text-sm font-semibold uppercase tracking-widest mb-2">
+                        Featured
                     </p>
-                    <form className="newsletter-form" onSubmit={(e) => e.preventDefault()}>
-                        <input
-                            type="email"
-                            placeholder="Enter your email address"
-                            className="newsletter-input"
-                            required
+                    <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+                        Best Sellers
+                    </h2>
+                    <p className="text-gray-500 dark:text-gray-400 mt-3">
+                        Our most popular designs loved by customers worldwide
+                    </p>
+                </div>
+
+                {loading ? (
+                    <div className="text-center py-12">
+                        <p className="text-gray-500 dark:text-gray-400">Loading products...</p>
+                    </div>
+                ) : products.length === 0 ? (
+                    <div className="text-center py-12">
+                        <p className="text-gray-500 dark:text-gray-400">
+                            No products available yet
+                        </p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                        {products.slice(0, 4).map((product) => (
+                            <div 
+                                key={product.product_id}
+                                onClick={() => navigate(`/product/${product.product_id}`)}
+                                className="bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-xl transition-shadow overflow-hidden cursor-pointer"
+                            >
+                                <div className="bg-gray-100 dark:bg-gray-700 h-48 flex items-center justify-center">
+                                    <img 
+                                        src={`https://via.placeholder.com/300x300/667eea/ffffff?text=${product.product_name ? product.product_name.substring(0, 8) : 'Product'}`}
+                                        alt={product.product_name || 'Product'}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <div className="p-4">
+                                    <h3 className="font-semibold text-gray-900 dark:text-white mb-2 truncate">
+                                        {product.product_name || 'Product'}
+                                    </h3>
+                                    <p className="text-purple-600 dark:text-purple-400 font-bold">
+                                        ${formatPrice(product.price)}
+                                    </p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+
+                <div className="text-center mt-10">
+                    <Link 
+                        to="/products" 
+                        className="inline-block bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-full font-semibold transition-colors"
+                    >
+                        View All Products
+                    </Link>
+                </div>
+            </div>
+
+            {/* Features */}
+            <div className="bg-white dark:bg-gray-900 py-16">
+                <div className="max-w-6xl mx-auto px-6">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
+                            Why Choose Wajelwa
+                        </h2>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div className="text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                            <p className="text-4xl mb-4">🚚</p>
+                            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                                Free Shipping
+                            </h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                On all orders over R500
+                            </p>
+                        </div>
+                        <div className="text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                            <p className="text-4xl mb-4">🔄</p>
+                            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                                Easy Returns
+                            </h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                30-day return policy
+                            </p>
+                        </div>
+                        <div className="text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                            <p className="text-4xl mb-4">🔒</p>
+                            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                                Secure Payment
+                            </h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Encrypted transactions
+                            </p>
+                        </div>
+                        <div className="text-center p-6 bg-gray-50 dark:bg-gray-800 rounded-xl">
+                            <p className="text-4xl mb-4">💎</p>
+                            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+                                Premium Quality
+                            </h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Quality craftsmanship
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Call to Action */}
+            <div className="max-w-6xl mx-auto px-6 py-16">
+                <div className="bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-800 dark:to-indigo-800 rounded-2xl p-12 text-center">
+                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                        Ready to Upgrade Your Style?
+                    </h2>
+                    <p className="text-purple-100 max-w-2xl mx-auto mb-8">
+                        Join thousands of satisfied customers who have discovered the perfect blend 
+                        of comfort and style with Wajelwa.
+                    </p>
+                    <Link 
+                        to="/products" 
+                        className="inline-block bg-white text-purple-700 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors"
+                    >
+                        Explore Collection
+                    </Link>
+                </div>
+            </div>
+
+            {/* Newsletter */}
+            <div className="bg-white dark:bg-gray-900 py-16">
+                <div className="max-w-2xl mx-auto px-6 text-center">
+                    <p className="text-4xl mb-4">✉️</p>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                        Stay in the Loop
+                    </h2>
+                    <p className="text-gray-500 dark:text-gray-400 mb-6">
+                        Subscribe for exclusive offers and early access to new drops
+                    </p>
+                    <form 
+                        className="flex flex-col sm:flex-row gap-3" 
+                        onSubmit={(e) => e.preventDefault()}
+                    >
+                        <input 
+                            type="email" 
+                            placeholder="Enter your email"
+                            className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-700 rounded-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                         />
-                        <button type="submit" className="newsletter-btn">
+                        <button 
+                            type="submit" 
+                            className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-full font-semibold transition-colors"
+                        >
                             Subscribe
                         </button>
                     </form>
-                    <p className="newsletter-note">No spam, unsubscribe anytime.</p>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-4">
+                        No spam, unsubscribe anytime
+                    </p>
                 </div>
-            </section>
+            </div>
         </div>
     );
 };
