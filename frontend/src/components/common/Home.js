@@ -64,11 +64,11 @@ const Home = () => {
                 <div className="category-grid">
 
     <Link 
-        to="/products?category=tshirts"
+        to="/products?category=1"
         className="category-card"
     >
         <div className="category-image">
-            <img src="/images/sweater1.jpg" alt="Wajelwa T-Shirts" />
+            <img src="/images" alt="Wajelwa T-Shirts" />
         </div>
 
         <div className="category-info">
@@ -79,7 +79,7 @@ const Home = () => {
 
 
     <Link 
-        to="/products?category=hoodies"
+        to="/products?category=2"
         className="category-card"
     >
         <div className="category-image">
@@ -93,7 +93,7 @@ const Home = () => {
     </Link>
 
     <Link 
-        to="/products?category=sweaters"
+        to="/products?category=3"
         className="category-card"
     >
         <div className="category-image">
@@ -101,7 +101,7 @@ const Home = () => {
         </div>
 
         <div className="category-info">
-            <h3>Sweaters</h3>
+            <h3>Designer Prints</h3>
             <span>SHOP →</span>
         </div>
     </Link>

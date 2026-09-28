@@ -44,16 +44,16 @@ const Navbar = () => {
                                     All Products
                                 </Link>
 
-                                <Link to="/products?category=tshirts">
+                                <Link to="/products?category=1">
                                     T-Shirts
                                 </Link>
 
-                                <Link to="/products?category=hoodies">
+                                <Link to="/products?category=2">
                                     Hoodies
                                 </Link>
 
-                                <Link to="/products?category=sweaters">
-                                    Sweaters
+                                <Link to="/products?category=3">
+                                    Designer Prints
                                 </Link>
 
                             </div>

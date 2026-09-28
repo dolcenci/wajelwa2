@@ -2,18 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { productService } from '../../services/api';
 import { Link, useSearchParams } from 'react-router-dom';
 
+
 const ProductList = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [searchParams] = useSearchParams();
     const [filters, setFilters] = useState({
-    category: '',
+    category: searchParams.get('category') || '',
     sort: '',
 });
     useEffect(() => {
-        fetchProducts();
-    }, [filters]);
+    fetchProducts();
+}, [filters, searchParams]);
+
+useEffect(() => {
+    const categoryFromURL = searchParams.get('category') || '';
+
+    setFilters(prev => ({
+        ...prev,
+        category: categoryFromURL
+    }));
+}, [searchParams]);
 
     const fetchProducts = async () => {
     try {
