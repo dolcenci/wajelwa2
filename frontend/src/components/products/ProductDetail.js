@@ -331,30 +331,6 @@ console.log('PRODUCT DATA:', productData);
 
                     )}
 
-
-                    {/* =========================
-                        DESCRIPTION
-                    ========================== */}
-
-                    <p className="product-description">
-                        {product.description ||
-                            'No description available.'}
-                    </p>
-
-
-                    {/* =========================
-                        STOCK
-                    ========================== */}
-
-                    <p className="product-stock">
-
-                        {product.stock_quantity > 0
-                            ? `${product.stock_quantity} available`
-                            : 'Out of Stock'}
-
-                    </p>
-
-
                     {/* =========================
                         QUANTITY
                     ========================== */}
