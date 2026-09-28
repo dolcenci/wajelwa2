@@ -15,6 +15,7 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import AddProduct from './components/admin/AddProduct';
 import EditProduct from './components/admin/EditProduct';
 import Footer from './components/common/Footer';
+import Profile from './components/common/Profile';
 
 
 // Protected Route component
@@ -35,6 +36,7 @@ const AdminRoute = ({ children }) => {
     return children;
 };
 
+
 function App() {
     
 return (
@@ -49,6 +51,14 @@ return (
                 <Route path="/about" element={<AboutUS />} />
                 <Route path="/support" element={<Support />} />
                 <Route path="/orders" element={<Orders />} />
+                <Route
+    path="/profile"
+    element={
+        <ProtectedRoute>
+            <Profile />
+        </ProtectedRoute>
+    }
+/>
                 <Route path="/products/:id" element={<ProductDetail />} />
                 <Route path="/cart" element={
                     <ProtectedRoute>

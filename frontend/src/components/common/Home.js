@@ -68,7 +68,7 @@ const Home = () => {
         className="category-card"
     >
         <div className="category-image">
-            <img src="/images" alt="Wajelwa T-Shirts" />
+            <img src="/images/wajelwa.jpg" alt="Wajelwa T-Shirts" />
         </div>
 
         <div className="category-info">
@@ -83,7 +83,7 @@ const Home = () => {
         className="category-card"
     >
         <div className="category-image">
-            <img src="/images/wajelwaHero.png" alt="Wajelwa Hoodies" />
+             <img src="/images/wajelwa.jpg" alt="Wajelwa T-Shirts" />
         </div>
 
         <div className="category-info">
@@ -97,7 +97,7 @@ const Home = () => {
         className="category-card"
     >
         <div className="category-image">
-            <img src="/images/sweater.jpg" alt="Wajelwa Sweaters" />
+             <img src="/images/wajelwa.jpg" alt="Wajelwa T-Shirts" />
         </div>
 
         <div className="category-info">

@@ -17,8 +17,8 @@ const About = () => {
                 </div>
 
                 <div className="about-hero-image">
-                    <div className="about-image-placeholder">
-                        <span>WAJELWA</span>
+                    <div >
+                         <img src="/images/wajelwa.jpg" alt="Wajelwa T-Shirts" />
                     </div>
                 </div>
             </section>
@@ -89,8 +89,8 @@ const About = () => {
             <section className="about-statement">
 
                 <div className="statement-image">
-                    <div className="statement-placeholder">
-                        <span>DESIGNED TO STAND OUT</span>
+                    <div >
+                         <img src="/images/wajelwa.jpg" alt="Wajelwa T-Shirts" />
                     </div>
                 </div>
 

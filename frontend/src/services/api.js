@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create axios instance with base URL
 const API = axios.create({
-    baseURL: 'http://localhost:5000/api',
+    baseURL: 'http://localhost:3000/api',
     headers: {
         'Content-Type': 'application/json',
     },
@@ -53,6 +53,14 @@ export const orderService = {
     getOrderById: (id) => API.get(`/orders/${id}`),
 };
 
+export const profileService = {
 
+    getProfile: () =>
+        API.get('/users/profile'),
+
+    updateProfile: (data) =>
+        API.put('/users/profile', data)
+
+};
 
 export default API;

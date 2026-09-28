@@ -90,7 +90,7 @@ const Navbar = () => {
                         className="nav-icon"
                         aria-label="Account"
                         onClick={() =>
-                            navigate(isAuthenticated ? '/account' : '/login')
+                            navigate(isAuthenticated ? '/profile' : '/login')
                         }
                     >
                         <svg viewBox="0 0 24 24">

@@ -59,14 +59,7 @@ const Login = () => {
                 <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-xl leading-none" >{showPassword ? '◉' : '◎'}</button>
               </div>
             </div>
-            <div className="text-center text-sm leading-tight">
-              <span>Or<br />Sign in with:</span>
-              <div className="flex items-center justify-center gap-6 mt-3" aria-label="Social sign-in options shown in reference">
-                <span className="text-2xl font-bold text-blue-600" aria-hidden="true">G</span>
-                <span className="text-2xl" aria-hidden="true">●</span>
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#4267B2] text-white text-xl font-bold" aria-hidden="true">f</span>
-              </div>
-            </div>
+           
             <button type="submit" disabled={loading} className="block w-full rounded-full border-2 border-[#292929] bg-[#f6f6f6] py-2 font-bold shadow-[1px_3px_2px_#777] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:opacity-60">
               {loading ? 'Signing in...' : 'Login'}
             </button>
