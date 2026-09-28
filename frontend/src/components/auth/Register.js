@@ -3,153 +3,91 @@ import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../../services/api';
 
 const Register = () => {
-    const navigate = useNavigate();
-    const [formData, setFormData] = useState({
-        full_name: '', email: '', password: '', confirmPassword: ''
-    });
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    full_name: '', email: '', password: '', confirmPassword: ''
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
 
-        if (formData.password !== formData.confirmPassword) {
-            setError('Passwords do not match');
-            return;
-        }
-        if (formData.password.length < 6) {
-            setError('Password must be at least 6 characters');
-            return;
-        }
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
 
-        setLoading(true);
-        try {
-            const { confirmPassword, ...registerData } = formData;
-            const response = await authService.register(registerData);
-            localStorage.setItem('token', response.data.token);
-            localStorage.setItem('user', JSON.stringify(response.data.user));
-            navigate('/');
-        } catch (err) {
-            setError(err.response?.data?.message || 'Registration failed. Please try again.');
-        } finally {
-            setLoading(false);
-        }
-    };
+    setLoading(true);
+    try {
+      const { confirmPassword, ...registerData } = formData;
+      const response = await authService.register(registerData);
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+      navigate('/');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+const inputClass = 'w-full h-11 rounded-xl bg-white px-4 text-center text-sm outline-none focus:ring-2 focus:ring-black';
 
-    const inputClass = "w-full px-4 py-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all";
-
-    return (
-        <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-gradient-to-br from-purple-50 via-white to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-purple-950">
-            <div className="w-full max-w-md animate-fade-in">
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 text-white text-3xl shadow-lg mb-4">
-                        ✨
-                    </div>
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                        Create Account
-                    </h1>
-                    <p className="text-gray-500 dark:text-gray-400 mt-2">
-                        Join Wajelwa today and start shopping
-                    </p>
-                </div>
-
-                <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 p-8">
-                    {error && (
-                        <div className="mb-6 p-4 rounded-xl bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm">
-                            {error}
-                        </div>
-                    )}
-
-                    <form onSubmit={handleSubmit} className="space-y-5">
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                Full Name
-                            </label>
-                            <input
-                                type="text"
-                                name="full_name"
-                                value={formData.full_name}
-                                onChange={handleChange}
-                                required
-                                placeholder="John Doe"
-                                className={inputClass}
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                Email Address
-                            </label>
-                            <input
-                                type="email"
-                                name="email"
-                                value={formData.email}
-                                onChange={handleChange}
-                                required
-                                placeholder="you@example.com"
-                                className={inputClass}
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                Password
-                            </label>
-                            <input
-                                type="password"
-                                name="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                required
-                                placeholder="Min. 6 characters"
-                                className={inputClass}
-                            />
-                        </div>
-
-                        <div>
-                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                                Confirm Password
-                            </label>
-                            <input
-                                type="password"
-                                name="confirmPassword"
-                                value={formData.confirmPassword}
-                                onChange={handleChange}
-                                required
-                                placeholder="Repeat your password"
-                                className={inputClass}
-                            />
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-                        >
-                            {loading ? 'Creating Account...' : 'Create Account'}
-                        </button>
-                    </form>
-
-                    <div className="mt-6 text-center">
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
-                            Already have an account?{' '}
-                            <Link
-                                to="/login"
-                                className="font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700"
-                            >
-                                Sign In
-                            </Link>
-                        </p>
-                    </div>
-                </div>
-            </div>
+  return (
+    <main className="min-h-screen bg-[#e9e9e9] p-4 sm:p-6 lg:p-8 font-sans">
+      <div className="grid lg:grid-cols-2 overflow-hidden rounded-2xl shadow-2xl">
+      <section className="min-h-[280px] lg:min-h-[calc(100vh-4rem)] bg-white flex items-center justify-center px-6 text-[#242424]" aria-label="Wajelwa brand">
+        <div className="w-full max-w-[450px] text-center">
+          <div className="flex items-end justify-center gap-4 sm:gap-8 mb-3">
+            <span className="text-lg sm:text-xl pb-1">EST.</span>
+            <span className="block w-20 h-20 sm:w-28 sm:h-28 rounded-full border-[14px] sm:border-[18px] border-[#242424]" aria-hidden="true" />
+            <span className="text-lg sm:text-xl pb-1">2019</span>
+          </div>
+          <h1 className="text-5xl sm:text-6xl tracking-tight font-light leading-none">WAJELWA</h1>
+          <p className="mt-2 text-sm">Designed To Stand Out</p>
         </div>
-    );
+      </section>
+
+      <section className="min-h-[650px] lg:min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-5 py-12 bg-black text-white">
+        <h2 className="text-4xl sm:text-5xl font-bold mb-8">Register</h2>
+        <div className="w-full max-w-[360px] rounded-xl bg-[#c8c8c8] px-7 sm:px-9 py-8 text-black shadow-xl">
+          {error && <div role="alert" className="mb-5 rounded-lg bg-red-100 p-3 text-sm text-red-800">{error}</div>}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label htmlFor="full_name" className="block text-sm font-semibold mb-2">Full Name:</label>
+              <input id="full_name" type="text" name="full_name" autoComplete="name" value={formData.full_name} onChange={handleChange} required placeholder="Enter full name" className={inputClass} />
+            </div>
+            <div>
+              <label htmlFor="email" className="block text-sm font-semibold mb-2">Email:</label>
+              <input id="email" type="email" name="email" autoComplete="email" value={formData.email} onChange={handleChange} required placeholder="Enter email address" className={inputClass} />
+            </div>
+            <div>
+              <label htmlFor="password" className="block text-sm font-semibold mb-2">Password:</label>
+              <input id="password" type="password" name="password" autoComplete="new-password" value={formData.password} onChange={handleChange} required placeholder="Min. 6 characters" className={inputClass} />
+            </div>
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-semibold mb-2">Confirm Password:</label>
+              <input id="confirmPassword" type="password" name="confirmPassword" autoComplete="new-password" value={formData.confirmPassword} onChange={handleChange} required placeholder="Repeat your password" className={inputClass} />
+            </div>
+            <button type="submit" disabled={loading} className="block w-full rounded-full border-2 border-[#292929] bg-[#f6f6f6] py-2 font-bold shadow-[1px_3px_2px_#777] hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-black disabled:opacity-60">
+              {loading ? 'Creating Account...' : 'Create Account'}
+            </button>
+          </form>
+          <p className="mt-5 text-center text-sm">Already have an account? <Link to="/login" className="font-semibold underline">Sign in</Link></p>
+        </div>
+      </section>
+      </div>
+    </main>
+  );
 };
 
 export default Register;
