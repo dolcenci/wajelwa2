@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const pool = require('./config/db');
 require('dotenv').config();
 
 // Import route files
@@ -32,6 +33,6 @@ app.get('/api/test', (req, res) => {
 
 // Start the server
 app.listen(PORT, () => {
-    console.log(`🚀 Wajelwa Backend is running on http://localhost:${PORT}`);
-    console.log(`📡 API is available at http://localhost:${PORT}/api/`);
+    console.log(`Wajelwa Backend is running on http://localhost:${PORT}`);
+    console.log(` API is available at http://localhost:${PORT}/api/`);
 });

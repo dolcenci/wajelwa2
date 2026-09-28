@@ -40,11 +40,13 @@ const getProductById = async (req, res) => {
 
         // Format product to ensure prices are numbers
         const formattedProduct = {
-            ...product,
-            price: parseFloat(product.price) || 0,
-            stock_quantity: parseInt(product.stock_quantity) || 0,
-            image_urls: product.image_urls || []
-        };
+    ...product,
+    price: parseFloat(product.price) || 0,
+    stock_quantity: parseInt(product.stock_quantity) || 0,
+    image_urls: product.image_urls || [],
+    sizes: product.sizes || [],
+    colors: product.colors || []
+};
 
         res.json(formattedProduct);
     } catch (error) {
