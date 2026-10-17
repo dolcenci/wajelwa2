@@ -72,7 +72,9 @@ const Navbar = () => {
 
                 {/* RIGHT SIDE ICONS */}
                 <div className="nav-actions">
-
+<Link to="/wishlist">
+    ♡ 
+</Link>
                     {/* SEARCH */}
                     <button
                         className="nav-icon"

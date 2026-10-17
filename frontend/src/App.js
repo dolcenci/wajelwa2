@@ -18,6 +18,7 @@ import Footer from './components/common/Footer';
 import Profile from './components/common/Profile';
 import Checkout from './components/cart/checkout';
 import OrderConfirmation from './components/orders/OrderConfirmation';
+import Wishlist from './components/common/Wishlist';
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -52,6 +53,7 @@ return (
                 <Route path="/about" element={<AboutUS />} />
                 <Route path="/support" element={<Support />} />
                 <Route path="/orders" element={<Orders />} />
+                <Route path="/wishlist" element={<Wishlist />} />
                 <Route
     path="/profile"
     element={

@@ -63,4 +63,10 @@ export const profileService = {
 
 };
 
+export const wishlistService = {
+    getAll: () => API.get('/wishlist'),
+    add: (productId) => API.post('/wishlist', { productId }),
+    remove: (productId) => API.delete(`/wishlist/${productId}`)
+};
+
 export default API;

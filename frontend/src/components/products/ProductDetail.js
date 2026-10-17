@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { productService, cartService } from '../../services/api';
+import { useParams, useNavigate,  useSearchParams } from 'react-router-dom';
+import { productService, cartService, wishlistService } from '../../services/api';
+
 
 const ProductDetail = () => {
     const { id } = useParams();
@@ -18,6 +19,12 @@ const ProductDetail = () => {
 
     const [addingToCart, setAddingToCart] = useState(false);
     const [addMessage, setAddMessage] = useState('');
+
+    const [searchParams] = useSearchParams();
+    const fromWishlist = searchParams.get('from') === 'wishlist';
+
+    const [savingWishlist, setSavingWishlist] = useState(false);
+    const [wishlistMessage, setWishlistMessage] = useState('');
 
     useEffect(() => {
         fetchProduct();
@@ -64,6 +71,32 @@ console.log('PRODUCT DATA:', productData);
         }
     };
 
+    
+const handleAddToWishlist = async () => {
+    if (!localStorage.getItem('token')) {
+        navigate('/login');
+        return;
+    }
+
+    try {
+        setSavingWishlist(true);
+        setError('');
+        setWishlistMessage('');
+
+        await wishlistService.add(Number(id));
+
+        setWishlistMessage('♡ Added to your wishlist!');
+    } catch (err) {
+        setError(
+            err.response?.data?.message ||
+            'Could not add this product to your wishlist.'
+        );
+    } finally {
+        setSavingWishlist(false);
+    }
+};
+
+
     const handleAddToCart = async () => {
         const token = localStorage.getItem('token');
 
@@ -93,6 +126,20 @@ console.log('PRODUCT DATA:', productData);
                 color: selectedColor,
                 size: selectedSize
             });
+           
+if (fromWishlist) {
+    try {
+        await wishlistService.remove(Number(id));
+        navigate('/cart');
+    } catch (err) {
+        // Product was added successfully, even if wishlist removal failed.
+        setAddMessage(
+            'Added to cart, but could not remove from wishlist.'
+        );
+    }
+    return;
+}
+
 
             setAddMessage('Added to cart successfully!');
 
@@ -228,7 +275,14 @@ console.log('PRODUCT DATA:', productData);
 
                     {/* Product name */}
                     <h1>
-                        {product.product_name}
+                        {product.product_name}  <button
+    type="button"
+    className="add-to-wishlist-btn"
+    onClick={handleAddToWishlist}
+    disabled={savingWishlist}
+>
+    {savingWishlist ? 'SAVING...' : '  ♡  '}
+</button>
                     </h1>
 
                     {/* Category */}
@@ -382,15 +436,8 @@ console.log('PRODUCT DATA:', productData);
                         </div>
 
                     )}
-                    {Number(product.stock_quantity) <= 0 ? (
-    <span className="stock-badge out-of-stock">
-        Out of Stock
-    </span>
-) : (
-    <span className="stock-badge in-stock">
-        In Stock
-    </span>
-)}
+                  
+ 
 
 
                     {/* =========================
@@ -411,9 +458,28 @@ console.log('PRODUCT DATA:', productData);
                                 : 'ADD TO CART'}
 
                         </button>
+                        
 
                     )}
 
+ <br></br>
+    {Number(product.stock_quantity) <= 0 ? (
+    <span className="stock-badge out-of-stock">
+        Out of Stock
+    </span>
+) : (
+    <span className="stock-badge in-stock">
+        In Stock
+    </span>
+)}
+                    <br></br>
+
+
+{wishlistMessage && (
+    <p className="success-message">
+        {wishlistMessage}
+    </p>
+)}
 
                     {/* Success message */}
                     {addMessage && (
