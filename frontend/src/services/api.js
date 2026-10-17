@@ -48,7 +48,7 @@ export const cartService = {
 
 // Order Services
 export const orderService = {
-    createOrder: () => API.post('/orders'),
+   createOrder: (data) => API.post('/orders', data),
     getOrders: () => API.get('/orders'),
     getOrderById: (id) => API.get(`/orders/${id}`),
 };

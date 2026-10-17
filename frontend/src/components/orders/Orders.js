@@ -202,6 +202,70 @@ const Orders = () => {
                                             <OrderProgress
                                                 currentStatus={order.status}
                                             />
+                                            
+{/* DELIVERY INFORMATION */}
+{order.delivery_details && (
+    <div className="order-delivery-section">
+
+        <div className="order-section-heading">
+            <h3>Delivery Information</h3>
+        </div>
+
+        <div className="order-delivery-card">
+            <div className="order-delivery-icon">
+                📍
+            </div>
+
+            <div className="order-delivery-content">
+                <h4>
+                    {order.delivery_details.fullName}
+                </h4>
+
+                <p>
+                    {order.delivery_details.streetAddress}
+                </p>
+
+                <p>
+                    {order.delivery_details.suburb}
+                </p>
+
+                <p>
+                    {order.delivery_details.city},{' '}
+                    {order.delivery_details.province}
+                </p>
+
+                <p>
+                    {order.delivery_details.postalCode}
+                </p>
+
+                <div className="order-delivery-contact">
+                    <p>
+                        <strong>Phone:</strong>{' '}
+                        {order.delivery_details.phone}
+                    </p>
+
+                    <p>
+                        <strong>Email:</strong>{' '}
+                        {order.delivery_details.email}
+                    </p>
+                </div>
+
+                {order.delivery_details.instructions && (
+                    <div className="order-delivery-instructions">
+                        <strong>
+                            Delivery Instructions
+                        </strong>
+
+                        <p>
+                            {order.delivery_details.instructions}
+                        </p>
+                    </div>
+                )}
+            </div>
+        </div>
+    </div>
+)}
+
 
                                             {/* ITEMS */}
                                             <div className="order-items-section">

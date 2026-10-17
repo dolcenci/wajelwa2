@@ -382,6 +382,15 @@ console.log('PRODUCT DATA:', productData);
                         </div>
 
                     )}
+                    {Number(product.stock_quantity) <= 0 ? (
+    <span className="stock-badge out-of-stock">
+        Out of Stock
+    </span>
+) : (
+    <span className="stock-badge in-stock">
+        In Stock
+    </span>
+)}
 
 
                     {/* =========================

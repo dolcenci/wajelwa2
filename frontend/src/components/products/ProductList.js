@@ -132,13 +132,16 @@ useEffect(() => {
             <div className="product-grid">
     {products.length === 0 ? (
         <p className="no-products">No products found</p>
+     
     ) : (
         products.map((product) => (
             <div key={product.id} className="product-card">
               <Link to={`/products/${product.product_id}`}>
     <div className="product-image">
         {product.image_urls && product.image_urls.length > 0 ? (
+        
             <img
+        
                 src={product.image_urls[0]}
                 alt={product.product_name}
             />
@@ -157,11 +160,18 @@ useEffect(() => {
         R{formatPrice(product.price)}
     </p>
 
-    <p className="product-stock">
-        {product.stock_quantity > 0
-            ? 'In Stock'
-            : 'Out of Stock'}
-    </p>
+   
+{Number(product.stock_quantity) <= 0 ? (
+    <span className="stock-badge out-of-stock">
+        Out of Stock
+    </span>
+) : (
+    <span className="stock-badge in-stock">
+        In Stock
+    </span>
+)}
+<br></br>
+<br></br>
 </Link>
             </div>
         ))

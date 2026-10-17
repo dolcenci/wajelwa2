@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { cartService, orderService } from '../../services/api';
@@ -75,26 +74,17 @@ const Cart = () => {
         }
     };
 
-    const handleCheckout = async () => {
-        try {
-            setUpdating(true);
+    
+const handleCheckout = () => {
+    if (cartItems.length === 0) {
+        setError('Your cart is empty.');
+        return;
+    }
 
-            await orderService.createOrder();
 
-            navigate('/orders');
-        } catch (err) {
-            console.error(err);
+    navigate('/checkout');
+};
 
-            setError(
-                err.response?.data?.message ||
-                'Failed to create order'
-            );
-
-            setTimeout(() => setError(''), 3000);
-        } finally {
-            setUpdating(false);
-        }
-    };
 
     const getPriceAsNumber = (price) => {
         if (price === undefined || price === null) {
@@ -289,7 +279,7 @@ const Cart = () => {
                                                                     0) - 1
                                                             )
                                                         }
-                                                        disabled={updating}
+                                                        disabled={updating || Number(item.quantity) <= 1}
                                                     >
                                                         −
                                                     </button>
@@ -306,7 +296,10 @@ const Cart = () => {
                                                                     0) + 1
                                                             )
                                                         }
-                                                        disabled={updating}
+                                                        disabled={
+    updating ||
+    Number(item.quantity) >= Number(item.stock_quantity)
+}
                                                     >
                                                         +
                                                     </button>

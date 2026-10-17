@@ -16,7 +16,8 @@ import AddProduct from './components/admin/AddProduct';
 import EditProduct from './components/admin/EditProduct';
 import Footer from './components/common/Footer';
 import Profile from './components/common/Profile';
-
+import Checkout from './components/cart/checkout';
+import OrderConfirmation from './components/orders/OrderConfirmation';
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -64,7 +65,14 @@ return (
                     <ProtectedRoute>
                         <Cart />
                     </ProtectedRoute>
+
                 } />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route
+    path="/order-confirmation/:orderId"
+    element={<OrderConfirmation />}
+/>
+
                 <Route path="/orders" element={
                     <ProtectedRoute>
                         <Orders />
