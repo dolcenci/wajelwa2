@@ -3,11 +3,17 @@ const router = express.Router();
 const paymentController = require('../controllers/paymentController');
 const { authenticateToken } = require('../middleware/auth');
 
-// Protected routes (require authentication)
-router.post('/create-payment-intent', authenticateToken, paymentController.createPaymentIntent);
-router.post('/confirm-payment', authenticateToken, paymentController.confirmPayment);
+// The webhook is mounted separately in server.js with express.raw() — not here.
+router.post(
+    '/create-payment-intent',
+    authenticateToken,
+    paymentController.createPaymentIntent
+);
 
-// Webhook endpoint (no authentication, Stripe will call this)
-router.post('/webhook', express.raw({type: 'application/json'}), paymentController.handleWebhook);
+router.post(
+    '/confirm-payment',
+    authenticateToken,
+    paymentController.confirmPayment
+);
 
 module.exports = router;

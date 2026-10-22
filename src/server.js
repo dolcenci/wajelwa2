@@ -1,44 +1,47 @@
 const express = require('express');
 const cors = require('cors');
-const pool = require('./config/db');
 require('dotenv').config();
 
-
-const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// Import route files
 const productRoutes = require('./routes/productRoutes');
 const userRoutes = require('./routes/userRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const orderRoutes = require('./routes/orderRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
+const profileRoutes = require('./routes/profileRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
+const paymentController = require('./controllers/paymentController');
 
+const app = express();
+const PORT = process.env.PORT || 5000;
 
-// Serve static files (uploaded images) - THIS IS THE NEW LINE
-//app.use('/uploads', express.static('uploads'));
+app.use(cors());
 
-// API Routes
+// Webhook MUST be first — Stripe needs raw body, not parsed JSON.
+app.post(
+    '/api/payments/webhook',
+    express.raw({ type: 'application/json' }),
+    paymentController.handleWebhook
+);
+
+// Now parse JSON for everything else.
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Serve uploaded product images.
+app.use('/uploads', express.static('uploads'));
+
 app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/users/profile', profileRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/payments', paymentRoutes);
 
-
-
-// Test route
 app.get('/api/test', (req, res) => {
     res.json({ message: 'Wajelwa Backend is running successfully!' });
 });
 
-// Start the server
 app.listen(PORT, () => {
-    console.log(`Wajelwa Backend is running on http://localhost:${PORT}`);
-    console.log(` API is available at http://localhost:${PORT}/api/`);
+    console.log(`Backend running on http://localhost:${PORT}`);
 });

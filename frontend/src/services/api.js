@@ -1,14 +1,12 @@
 import axios from 'axios';
 
-// Create axios instance with base URL
 const API = axios.create({
-    baseURL: 'http://localhost:3000/api',
+    baseURL: 'http://localhost:5000/api',
     headers: {
         'Content-Type': 'application/json',
     },
 });
 
-// Add token to every request if it exists
 API.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('token');
@@ -17,12 +15,9 @@ API.interceptors.request.use(
         }
         return config;
     },
-    (error) => {
-        return Promise.reject(error);
-    }
+    (error) => Promise.reject(error)
 );
 
-// Auth Services
 export const authService = {
     register: (userData) => API.post('/users/register', userData),
     login: (credentials) => API.post('/users/login', credentials),
@@ -30,14 +25,13 @@ export const authService = {
     updateProfile: (data) => API.put('/users/profile', data),
 };
 
-// Product Services
 export const productService = {
     getAll: (params) => API.get('/products', { params }),
     getById: (id) => API.get(`/products/${id}`),
     create: (data) => API.post('/products', data),
+    delete: (id) => API.delete(`/products/${id}`),
 };
 
-// Cart Services
 export const cartService = {
     getCart: () => API.get('/cart'),
     addItem: (data) => API.post('/cart/add', data),
@@ -46,27 +40,30 @@ export const cartService = {
     clearCart: () => API.delete('/cart'),
 };
 
-// Order Services
 export const orderService = {
-   createOrder: (data) => API.post('/orders', data),
+    createOrder: (data) => API.post('/orders', data),
     getOrders: () => API.get('/orders'),
     getOrderById: (id) => API.get(`/orders/${id}`),
 };
 
 export const profileService = {
-
-    getProfile: () =>
-        API.get('/users/profile'),
-
-    updateProfile: (data) =>
-        API.put('/users/profile', data)
-
+    getProfile: () => API.get('/users/profile'),
+    updateProfile: (data) => API.put('/users/profile', data),
+    updateAddress: (data) => API.put('/users/profile/address', data),
+    updatePassword: (data) => API.put('/users/profile/password', data),
 };
 
 export const wishlistService = {
     getAll: () => API.get('/wishlist'),
     add: (productId) => API.post('/wishlist', { productId }),
-    remove: (productId) => API.delete(`/wishlist/${productId}`)
+    remove: (productId) => API.delete(`/wishlist/${productId}`),
+};
+
+export const paymentService = {
+    createPaymentIntent: (orderId) =>
+        API.post('/payments/create-payment-intent', { orderId }),
+    confirmPayment: (paymentIntentId) =>
+        API.post('/payments/confirm-payment', { paymentIntentId }),
 };
 
 export default API;

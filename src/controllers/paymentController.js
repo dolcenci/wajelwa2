@@ -1,150 +1,163 @@
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const pool = require('../config/db');
 const Order = require('../models/Order');
-const Cart = require('../models/Cart');
-const Product = require('../models/Product');
-const Payment = require('../models/Payment');
 
-// Create a payment intent
+const CURRENCY = (process.env.STRIPE_CURRENCY || 'zar').toLowerCase();
+
 const createPaymentIntent = async (req, res) => {
     try {
         const userId = req.user.userId;
         const { orderId } = req.body;
 
-        // Get the order details
-        const order = await Order.getOrderWithItems(orderId);
-
-        if (!order) {
-            return res.status(404).json({ message: 'Order not found' });
+        if (!orderId) {
+            return res.status(400).json({ message: 'orderId is required.' });
         }
 
-        // Verify the order belongs to the user
-        if (order.user_id !== userId) {
-            return res.status(403).json({ message: 'Unauthorized' });
-        }
-
-        // Check if payment already exists
-        const existingPayment = await Payment.getPaymentByOrderId(orderId);
-        if (existingPayment && existingPayment.payment_status === 'succeeded') {
-            return res.status(400).json({ message: 'Order already paid' });
-        }
-
-        // Calculate amount in cents (Stripe uses the smallest currency unit)
-        const amount = Math.round(parseFloat(order.total_amount) * 100);
-
-        // Create a PaymentIntent with Stripe
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount: amount,
-            currency: 'usd',
-            metadata: {
-                orderId: orderId.toString(),
-                userId: userId.toString(),
-            },
-        });
-
-        // Save payment record in database
-        const payment = await Payment.createPayment(
-            orderId,
-            paymentIntent.id,
-            amount / 100, // Store in dollars
-            'usd',
-            'pending'
+        const orderResult = await pool.query(
+            `SELECT order_id, user_id, total_amount, payment_status,
+                    stripe_payment_intent_id
+             FROM orders
+             WHERE order_id = $1 AND user_id = $2`,
+            [orderId, userId]
         );
 
-        res.status(201).json({
-            clientSecret: paymentIntent.client_secret,
-            paymentId: payment.payment_id,
-            orderId: orderId
+        if (orderResult.rowCount === 0) {
+            return res.status(404).json({ message: 'Order not found.' });
+        }
+
+        const order = orderResult.rows[0];
+
+        if (order.payment_status === 'paid') {
+            return res.status(400).json({ message: 'Order already paid.' });
+        }
+
+        // Reuse existing PaymentIntent if it exists and is still unpaid.
+        if (order.stripe_payment_intent_id) {
+            try {
+                const existing = await stripe.paymentIntents.retrieve(
+                    order.stripe_payment_intent_id
+                );
+                if (
+                    existing.status !== 'canceled' &&
+                    existing.status !== 'succeeded'
+                ) {
+                    return res.json({
+                        clientSecret: existing.client_secret,
+                        orderId: order.order_id,
+                        totalAmount: Number(order.total_amount)
+                    });
+                }
+            } catch (err) {
+                // Intent gone or unreachable, fall through to create a new one.
+            }
+        }
+
+        const amountMinor = Math.round(Number(order.total_amount) * 100);
+
+        const intent = await stripe.paymentIntents.create({
+            amount: amountMinor,
+            currency: CURRENCY,
+            metadata: {
+                orderId: String(order.order_id),
+                userId: String(userId)
+            },
+            automatic_payment_methods: { enabled: true }
+        });
+
+        await pool.query(
+            `UPDATE orders
+             SET stripe_payment_intent_id = $1
+             WHERE order_id = $2`,
+            [intent.id, order.order_id]
+        );
+
+        return res.json({
+            clientSecret: intent.client_secret,
+            orderId: order.order_id,
+            totalAmount: Number(order.total_amount)
         });
 
     } catch (error) {
-        console.error('Create payment intent error:', error);
-        res.status(500).json({
-            message: 'Failed to create payment intent',
-            error: error.message
-        });
+        console.error('createPaymentIntent error:', error);
+        return res.status(500).json({ message: 'Unable to start payment.' });
     }
 };
 
-// Confirm payment (webhook will handle this, but we also provide a manual endpoint)
 const confirmPayment = async (req, res) => {
     try {
         const { paymentIntentId } = req.body;
 
-        // Retrieve the payment intent from Stripe
-        const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+        if (!paymentIntentId) {
+            return res.status(400).json({ message: 'paymentIntentId is required.' });
+        }
 
-        if (paymentIntent.status === 'succeeded') {
-            // Update payment status in database
-            await Payment.updatePaymentStatus(paymentIntentId, 'succeeded');
+        const intent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
-            // Update order status
-            const orderId = parseInt(paymentIntent.metadata.orderId);
-            await Order.updateStatus(orderId, 'Processing');
-
-            res.json({
-                message: 'Payment confirmed successfully',
-                status: 'succeeded'
-            });
-        } else {
-            res.json({
-                message: 'Payment not yet completed',
-                status: paymentIntent.status
+        if (intent.status !== 'succeeded') {
+            return res.status(400).json({
+                message: `Payment not completed. Current status: ${intent.status}`
             });
         }
 
+        const orderId = parseInt(intent.metadata.orderId, 10);
+        const userId = parseInt(intent.metadata.userId, 10);
+
+        await Order.finalizeOrder(orderId, userId);
+
+        return res.json({ status: 'succeeded', orderId });
+
     } catch (error) {
-        console.error('Confirm payment error:', error);
-        res.status(500).json({
-            message: 'Failed to confirm payment',
-            error: error.message
-        });
+        console.error('confirmPayment error:', error);
+        return res.status(500).json({ message: 'Unable to confirm payment.' });
     }
 };
 
-// Webhook handler for Stripe events
 const handleWebhook = async (req, res) => {
     const sig = req.headers['stripe-signature'];
     let event;
 
     try {
-        // Verify webhook signature
-        const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-        if (webhookSecret) {
-            event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-        } else {
-            // If no webhook secret, just parse the event
-            event = req.body;
+        event = stripe.webhooks.constructEvent(
+            req.body,
+            sig,
+            process.env.STRIPE_WEBHOOK_SECRET
+        );
+    } catch (err) {
+        console.error('Webhook signature verification failed:', err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    try {
+        if (event.type === 'payment_intent.succeeded') {
+            const intent = event.data.object;
+            const orderId = parseInt(intent.metadata.orderId, 10);
+            const userId = parseInt(intent.metadata.userId, 10);
+
+            await pool.query(
+                `UPDATE orders SET payment_status = 'paid' WHERE order_id = $1`,
+                [orderId]
+            );
+
+            await Order.finalizeOrder(orderId, userId);
+            console.log(`Order ${orderId} finalized via webhook.`);
         }
 
-        // Handle the event
-        switch (event.type) {
-            case 'payment_intent.succeeded':
-                const paymentIntent = event.data.object;
-                console.log('Payment succeeded:', paymentIntent.id);
+        if (event.type === 'payment_intent.payment_failed') {
+            const intent = event.data.object;
+            const orderId = parseInt(intent.metadata.orderId, 10);
 
-                // Update payment status in database
-                await Payment.updatePaymentStatus(paymentIntent.id, 'succeeded');
-
-                // Update order status
-                const orderId = parseInt(paymentIntent.metadata.orderId);
-                await Order.updateStatus(orderId, 'Processing');
-                break;
-
-            case 'payment_intent.payment_failed':
-                const failedPayment = event.data.object;
-                console.log('Payment failed:', failedPayment.id);
-                await Payment.updatePaymentStatus(failedPayment.id, 'failed');
-                break;
-
-            default:
-                console.log(`Unhandled event type: ${event.type}`);
+            await pool.query(
+                `UPDATE orders SET payment_status = 'failed' WHERE order_id = $1`,
+                [orderId]
+            );
+            console.log(`Payment failed for order ${orderId}.`);
         }
 
-        res.json({ received: true });
+        return res.json({ received: true });
 
     } catch (error) {
-        console.error('Webhook error:', error);
-        res.status(400).send(`Webhook Error: ${error.message}`);
+        console.error('Webhook handler error:', error);
+        return res.status(500).json({ received: false });
     }
 };
 
