@@ -9,6 +9,7 @@ const orderRoutes = require('./routes/orderRoutes');
 const wishlistRoutes = require('./routes/wishlistRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const chatbotRoutes = require('./routes/chatbotRoutes');
 const paymentController = require('./controllers/paymentController');
 
 const app = express();
@@ -16,18 +17,16 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());
 
-// Webhook MUST be first — Stripe needs raw body, not parsed JSON.
+// Stripe webhook must receive raw body — mount before express.json()
 app.post(
     '/api/payments/webhook',
     express.raw({ type: 'application/json' }),
     paymentController.handleWebhook
 );
 
-// Now parse JSON for everything else.
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Serve uploaded product images.
 app.use('/uploads', express.static('uploads'));
 
 app.use('/api/products', productRoutes);
@@ -37,6 +36,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 
 app.get('/api/test', (req, res) => {
     res.json({ message: 'Wajelwa Backend is running successfully!' });

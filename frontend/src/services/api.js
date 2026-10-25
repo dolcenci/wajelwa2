@@ -66,4 +66,8 @@ export const paymentService = {
         API.post('/payments/confirm-payment', { paymentIntentId }),
 };
 
+export const chatbotService = {
+    sendMessage: (message) => API.post('/chatbot/message', { message })
+};
+
 export default API;

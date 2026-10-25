@@ -19,8 +19,8 @@ import Profile from './components/common/Profile';
 import Checkout from './components/cart/checkout';
 import OrderConfirmation from './components/orders/OrderConfirmation';
 import Wishlist from './components/common/Wishlist';
+import Chatbot from './components/common/Chatbot';
 
-// Protected Route component
 const ProtectedRoute = ({ children }) => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -29,7 +29,6 @@ const ProtectedRoute = ({ children }) => {
     return children;
 };
 
-// Admin Route component
 const AdminRoute = ({ children }) => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -38,69 +37,80 @@ const AdminRoute = ({ children }) => {
     return children;
 };
 
-
 function App() {
-    
-return (
-    <Router>
-        <div className="App">
-            <Navbar />
-            <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/products" element={<ProductList />} />
-                <Route path="/about" element={<AboutUS />} />
-                <Route path="/support" element={<Support />} />
-                <Route path="/orders" element={<Orders />} />
-                <Route path="/wishlist" element={<Wishlist />} />
-                <Route
-    path="/profile"
-    element={
-        <ProtectedRoute>
-            <Profile />
-        </ProtectedRoute>
-    }
-/>
-                <Route path="/products/:id" element={<ProductDetail />} />
-                <Route path="/cart" element={
-                    <ProtectedRoute>
-                        <Cart />
-                    </ProtectedRoute>
-
-                } />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route
-    path="/order-confirmation/:orderId"
-    element={<OrderConfirmation />}
-/>
-
-                <Route path="/orders" element={
-                    <ProtectedRoute>
-                        <Orders />
-                    </ProtectedRoute>
-                } />
-                <Route path="/admin" element={
-                    <AdminRoute>
-                        <AdminDashboard />
-                    </AdminRoute>
-                } />
-                <Route path="/admin/add-product" element={
-                    <AdminRoute>
-                        <AddProduct />
-                    </AdminRoute>
-                } />
-                <Route path="/admin/edit-product/:id" element={
-                    <AdminRoute>
-                        <EditProduct />
-                    </AdminRoute>
-                } />
-            </Routes>
-            <Footer />
-        </div>
-    </Router>
-);
-
+    return (
+        <Router>
+            <div className="App">
+                <Navbar />
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/products" element={<ProductList />} />
+                    <Route path="/about" element={<AboutUS />} />
+                    <Route path="/support" element={<Support />} />
+                    <Route path="/orders" element={<Orders />} />
+                    <Route path="/wishlist" element={<Wishlist />} />
+                    <Route
+                        path="/profile"
+                        element={
+                            <ProtectedRoute>
+                                <Profile />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route path="/products/:id" element={<ProductDetail />} />
+                    <Route
+                        path="/cart"
+                        element={
+                            <ProtectedRoute>
+                                <Cart />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route
+                        path="/order-confirmation/:orderId"
+                        element={<OrderConfirmation />}
+                    />
+                    <Route
+                        path="/orders"
+                        element={
+                            <ProtectedRoute>
+                                <Orders />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/admin"
+                        element={
+                            <AdminRoute>
+                                <AdminDashboard />
+                            </AdminRoute>
+                        }
+                    />
+                    <Route
+                        path="/admin/add-product"
+                        element={
+                            <AdminRoute>
+                                <AddProduct />
+                            </AdminRoute>
+                        }
+                    />
+                    <Route
+                        path="/admin/edit-product/:id"
+                        element={
+                            <AdminRoute>
+                                <EditProduct />
+                            </AdminRoute>
+                        }
+                    />
+                </Routes>
+                <Footer />
+                <Chatbot />
+            </div>
+        </Router>
+    );
 }
 
 export default App;
