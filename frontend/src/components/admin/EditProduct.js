@@ -201,7 +201,7 @@ const EditProduct = () => {
                                 existingImages.map((url, index) => (
                                     <div key={index} className="existing-image-item">
                                         <img
-                                            src={`http://localhost:5000${url}`}
+                                            src={url}
                                             alt={`Product ${index + 1}`}
                                         />
                                     </div>

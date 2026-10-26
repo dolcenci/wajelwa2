@@ -27,7 +27,8 @@ app.post(
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-app.use('/uploads', express.static('uploads'));
+// Images are served from Neon Object Storage, so the local static route is no longer needed.
+// app.use('/uploads', express.static('uploads'));
 
 app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);

@@ -1,6 +1,6 @@
 const Product = require('../models/Product');
+const { uploadImage } = require('../config/s3');
 
-// Get all products
 const getProducts = async (req, res) => {
     try {
         const { category, minPrice, maxPrice, search } = req.query;
@@ -13,7 +13,6 @@ const getProducts = async (req, res) => {
 
         const products = await Product.getAll(filters);
 
-        // Format products to ensure prices are numbers and add image URLs
         const formattedProducts = products.map(product => ({
             ...product,
             price: parseFloat(product.price) || 0,
@@ -28,7 +27,6 @@ const getProducts = async (req, res) => {
     }
 };
 
-// Get a single product by ID
 const getProductById = async (req, res) => {
     try {
         const productId = req.params.id;
@@ -38,15 +36,14 @@ const getProductById = async (req, res) => {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        // Format product to ensure prices are numbers
         const formattedProduct = {
-    ...product,
-    price: parseFloat(product.price) || 0,
-    stock_quantity: parseInt(product.stock_quantity) || 0,
-    image_urls: product.image_urls || [],
-    sizes: product.sizes || [],
-    colors: product.colors || []
-};
+            ...product,
+            price: parseFloat(product.price) || 0,
+            stock_quantity: parseInt(product.stock_quantity) || 0,
+            image_urls: product.image_urls || [],
+            sizes: product.sizes || [],
+            colors: product.colors || []
+        };
 
         res.json(formattedProduct);
     } catch (error) {
@@ -55,20 +52,20 @@ const getProductById = async (req, res) => {
     }
 };
 
-// Create a new product with image upload
 const createProduct = async (req, res) => {
     try {
         const { product_name, description, price, stock_quantity, category_id } = req.body;
 
-        // Validate required fields
         if (!product_name || price === undefined || stock_quantity === undefined) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 
-        // Handle image uploads
         let imageUrls = [];
         if (req.files && req.files.length > 0) {
-            imageUrls = req.files.map(file => `/uploads/${file.filename}`);
+            for (const file of req.files) {
+                const url = await uploadImage(file.buffer, file.originalname, file.mimetype);
+                imageUrls.push(url);
+            }
         }
 
         const newProduct = await Product.create({
@@ -80,7 +77,6 @@ const createProduct = async (req, res) => {
             image_urls: imageUrls
         });
 
-        // Format response
         const formattedProduct = {
             ...newProduct,
             price: parseFloat(newProduct.price) || 0,
@@ -98,26 +94,24 @@ const createProduct = async (req, res) => {
     }
 };
 
-// Update an existing product
 const updateProduct = async (req, res) => {
     try {
         const productId = req.params.id;
         const { product_name, description, price, stock_quantity, category_id } = req.body;
 
-        // Get existing product
         const existingProduct = await Product.getById(productId);
         if (!existingProduct) {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        // Handle image uploads
         let imageUrls = existingProduct.image_urls || [];
         if (req.files && req.files.length > 0) {
-            const newImages = req.files.map(file => `/uploads/${file.filename}`);
-            imageUrls = [...imageUrls, ...newImages];
+            for (const file of req.files) {
+                const url = await uploadImage(file.buffer, file.originalname, file.mimetype);
+                imageUrls.push(url);
+            }
         }
 
-        // Build update object
         const updates = {};
         if (product_name) updates.product_name = product_name;
         if (description !== undefined) updates.description = description;
@@ -149,7 +143,6 @@ const updateProduct = async (req, res) => {
     }
 };
 
-// Delete a product
 const deleteProduct = async (req, res) => {
     try {
         const productId = req.params.id;
