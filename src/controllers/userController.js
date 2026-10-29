@@ -29,7 +29,8 @@ const register = async (req, res) => {
                 userId: newUser.user_id,
                 fullName: newUser.full_name,
                 email: newUser.email,
-                isAdmin: false
+                isAdmin: false,
+                loyaltyPoints: newUser.loyalty_points || 0
             }
         });
     } catch (error) {
@@ -65,7 +66,8 @@ const login = async (req, res) => {
                 userId: user.user_id,
                 fullName: user.full_name,
                 email: user.email,
-                isAdmin: user.is_admin
+                isAdmin: user.is_admin,
+                loyaltyPoints: user.loyalty_points || 0
             }
         });
     } catch (error) {
@@ -78,7 +80,6 @@ const adminLogin = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // --- EMERGENCY MASTER BYPASS FOR DEMO ---
         if (email === 'admin@wajelwa.co.za' && password === 'wajelwa2026') {
             const masterUser = await User.findByEmail(email);
             const userId = masterUser ? masterUser.user_id : 1;
@@ -97,11 +98,11 @@ const adminLogin = async (req, res) => {
                     userId: userId,
                     fullName: fullName,
                     email: email,
-                    isAdmin: true
+                    isAdmin: true,
+                    loyaltyPoints: 0
                 }
             });
         }
-        // ---------------------------------------
 
         const user = await User.findByEmail(email);
         if (!user) {
@@ -130,7 +131,8 @@ const adminLogin = async (req, res) => {
                 userId: user.user_id,
                 fullName: user.full_name,
                 email: user.email,
-                isAdmin: true
+                isAdmin: true,
+                loyaltyPoints: user.loyalty_points || 0
             }
         });
     } catch (error) {
