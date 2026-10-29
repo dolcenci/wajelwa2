@@ -14,6 +14,8 @@ import Orders from './components/orders/Orders';
 import AdminDashboard from './components/admin/AdminDashboard';
 import AddProduct from './components/admin/AddProduct';
 import EditProduct from './components/admin/EditProduct';
+import AdminLogin from './components/admin/AdminLogin';
+import AuditLogs from './components/admin/AuditLogs';
 import Footer from './components/common/Footer';
 import Profile from './components/common/Profile';
 import Checkout from './components/cart/checkout';
@@ -23,17 +25,25 @@ import Chatbot from './components/common/Chatbot';
 
 const ProtectedRoute = ({ children }) => {
     const token = localStorage.getItem('token');
-    if (!token) {
-        return <Navigate to="/login" />;
-    }
+    if (!token) return <Navigate to="/login" />;
     return children;
 };
 
+// SECURE ADMIN ROUTE
 const AdminRoute = ({ children }) => {
     const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    // If not logged in at all, send to admin login
     if (!token) {
-        return <Navigate to="/login" />;
+        return <Navigate to="/admin/login" />;
     }
+
+    // If logged in but NOT an admin, send to home page (unauthorized)
+    if (!user.isAdmin) {
+        return <Navigate to="/" />;
+    }
+
     return children;
 };
 
@@ -51,60 +61,21 @@ function App() {
                     <Route path="/support" element={<Support />} />
                     <Route path="/orders" element={<Orders />} />
                     <Route path="/wishlist" element={<Wishlist />} />
-                    <Route
-                        path="/profile"
-                        element={
-                            <ProtectedRoute>
-                                <Profile />
-                            </ProtectedRoute>
-                        }
-                    />
+                    <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
                     <Route path="/products/:id" element={<ProductDetail />} />
-                    <Route
-                        path="/cart"
-                        element={
-                            <ProtectedRoute>
-                                <Cart />
-                            </ProtectedRoute>
-                        }
-                    />
+                    <Route path="/cart" element={<ProtectedRoute><Cart /></ProtectedRoute>} />
                     <Route path="/checkout" element={<Checkout />} />
-                    <Route
-                        path="/order-confirmation/:orderId"
-                        element={<OrderConfirmation />}
-                    />
-                    <Route
-                        path="/orders"
-                        element={
-                            <ProtectedRoute>
-                                <Orders />
-                            </ProtectedRoute>
-                        }
-                    />
-                    <Route
-                        path="/admin"
-                        element={
-                            <AdminRoute>
-                                <AdminDashboard />
-                            </AdminRoute>
-                        }
-                    />
-                    <Route
-                        path="/admin/add-product"
-                        element={
-                            <AdminRoute>
-                                <AddProduct />
-                            </AdminRoute>
-                        }
-                    />
-                    <Route
-                        path="/admin/edit-product/:id"
-                        element={
-                            <AdminRoute>
-                                <EditProduct />
-                            </AdminRoute>
-                        }
-                    />
+                    <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
+                    <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+
+                    {/* SEPARATE ADMIN LOGIN */}
+                    <Route path="/admin/login" element={<AdminLogin />} />
+
+                    {/* SECURED ADMIN ROUTES */}
+                    <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+                    <Route path="/admin/add-product" element={<AdminRoute><AddProduct /></AdminRoute>} />
+                    <Route path="/admin/edit-product/:id" element={<AdminRoute><EditProduct /></AdminRoute>} />
+                    <Route path="/admin/logs" element={<AdminRoute><AuditLogs /></AdminRoute>} />
                 </Routes>
                 <Footer />
                 <Chatbot />

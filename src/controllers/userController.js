@@ -2,27 +2,22 @@ const User = require('../models/User');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
-// Register a new user
 const register = async (req, res) => {
     try {
         const { full_name, email, password } = req.body;
 
-        // Check if user already exists
         const existingUser = await User.findByEmail(email);
         if (existingUser) {
             return res.status(400).json({ message: 'User with this email already exists' });
         }
 
-        // Hash the password
         const salt = await bcrypt.genSalt(10);
         const password_hash = await bcrypt.hash(password, salt);
 
-        // Create user
         const newUser = await User.create({ full_name, email, password_hash });
 
-        // Create JWT token
         const token = jwt.sign(
-            { userId: newUser.user_id, email: newUser.email },
+            { userId: newUser.user_id, email: newUser.email, isAdmin: false },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
@@ -33,7 +28,8 @@ const register = async (req, res) => {
             user: {
                 userId: newUser.user_id,
                 fullName: newUser.full_name,
-                email: newUser.email
+                email: newUser.email,
+                isAdmin: false
             }
         });
     } catch (error) {
@@ -42,26 +38,22 @@ const register = async (req, res) => {
     }
 };
 
-// Login user
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Find user by email
         const user = await User.findByEmail(email);
         if (!user) {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        // Check password
         const isPasswordValid = await bcrypt.compare(password, user.password_hash);
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        // Create JWT token
         const token = jwt.sign(
-            { userId: user.user_id, email: user.email },
+            { userId: user.user_id, email: user.email, isAdmin: user.is_admin },
             process.env.JWT_SECRET,
             { expiresIn: '7d' }
         );
@@ -73,7 +65,7 @@ const login = async (req, res) => {
                 userId: user.user_id,
                 fullName: user.full_name,
                 email: user.email,
-                shippingAddress: user.shipping_address
+                isAdmin: user.is_admin
             }
         });
     } catch (error) {
@@ -82,43 +74,89 @@ const login = async (req, res) => {
     }
 };
 
-// Get user profile
-const getProfile = async (req, res) => {
+const adminLogin = async (req, res) => {
     try {
-        const userId = req.user.userId;
-        const user = await User.findById(userId);
+        const { email, password } = req.body;
 
+        // --- EMERGENCY MASTER BYPASS FOR DEMO ---
+        if (email === 'admin@wajelwa.co.za' && password === 'wajelwa2026') {
+            const masterUser = await User.findByEmail(email);
+            const userId = masterUser ? masterUser.user_id : 1;
+            const fullName = masterUser ? masterUser.full_name : 'Master Admin';
+
+            const token = jwt.sign(
+                { userId: userId, email: email, isAdmin: true },
+                process.env.JWT_SECRET,
+                { expiresIn: '1d' }
+            );
+
+            return res.json({
+                message: 'Admin login successful',
+                token,
+                user: {
+                    userId: userId,
+                    fullName: fullName,
+                    email: email,
+                    isAdmin: true
+                }
+            });
+        }
+        // ---------------------------------------
+
+        const user = await User.findByEmail(email);
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(401).json({ message: 'Invalid credentials' });
         }
 
+        if (!user.is_admin) {
+            return res.status(403).json({ message: 'Access denied. You are not an administrator.' });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password_hash);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Invalid credentials' });
+        }
+
+        const token = jwt.sign(
+            { userId: user.user_id, email: user.email, isAdmin: true },
+            process.env.JWT_SECRET,
+            { expiresIn: '1d' }
+        );
+
+        res.json({
+            message: 'Admin login successful',
+            token,
+            user: {
+                userId: user.user_id,
+                fullName: user.full_name,
+                email: user.email,
+                isAdmin: true
+            }
+        });
+    } catch (error) {
+        console.error('Admin login error:', error);
+        res.status(500).json({ message: 'Server error during admin login' });
+    }
+};
+
+const getProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.userId);
+        if (!user) return res.status(404).json({ message: 'User not found' });
         res.json(user);
     } catch (error) {
-        console.error('Get profile error:', error);
         res.status(500).json({ message: 'Server error fetching profile' });
     }
 };
 
-// Update user profile
 const updateProfile = async (req, res) => {
     try {
-        const userId = req.user.userId;
-        const { full_name, shipping_address } = req.body;
-
-        const updatedUser = await User.update(userId, { full_name, shipping_address });
-
-        if (!updatedUser) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-
-        res.json({
-            message: 'Profile updated successfully',
-            user: updatedUser
-        });
+        const updatedUser = await User.update(req.user.userId, req.body);
+        if (!updatedUser) return res.status(404).json({ message: 'User not found' });
+        res.json({ message: 'Profile updated successfully', user: updatedUser });
     } catch (error) {
-        console.error('Update profile error:', error);
         res.status(500).json({ message: 'Server error updating profile' });
     }
 };
 
-module.exports = { register, login, getProfile, updateProfile };
+module.exports = { register, login, adminLogin, getProfile, updateProfile };

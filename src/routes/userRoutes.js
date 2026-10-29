@@ -6,8 +6,9 @@ const { authenticateToken } = require('../middleware/auth');
 // Public routes
 router.post('/register', userController.register);
 router.post('/login', userController.login);
+router.post('/admin-login', userController.adminLogin); // Dedicated Admin Login
 
-// Protected routes (require authentication)
+// Protected routes
 router.get('/profile', authenticateToken, userController.getProfile);
 router.put('/profile', authenticateToken, userController.updateProfile);
 

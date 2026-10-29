@@ -1,10 +1,10 @@
 const Product = require('../models/Product');
 const { uploadImage } = require('../config/s3');
+const pool = require('../config/db');
 
 const getProducts = async (req, res) => {
     try {
         const { category, minPrice, maxPrice, search } = req.query;
-
         const filters = {};
         if (category) filters.category_id = parseInt(category);
         if (minPrice) filters.min_price = parseFloat(minPrice);
@@ -12,42 +12,32 @@ const getProducts = async (req, res) => {
         if (search) filters.search = search;
 
         const products = await Product.getAll(filters);
-
         const formattedProducts = products.map(product => ({
             ...product,
             price: parseFloat(product.price) || 0,
             stock_quantity: parseInt(product.stock_quantity) || 0,
             image_urls: product.image_urls || []
         }));
-
         res.json(formattedProducts);
     } catch (error) {
-        console.error('Get products error:', error);
         res.status(500).json({ message: 'Server error fetching products' });
     }
 };
 
 const getProductById = async (req, res) => {
     try {
-        const productId = req.params.id;
-        const product = await Product.getById(productId);
+        const product = await Product.getById(req.params.id);
+        if (!product) return res.status(404).json({ message: 'Product not found' });
 
-        if (!product) {
-            return res.status(404).json({ message: 'Product not found' });
-        }
-
-        const formattedProduct = {
+        res.json({
             ...product,
             price: parseFloat(product.price) || 0,
             stock_quantity: parseInt(product.stock_quantity) || 0,
             image_urls: product.image_urls || [],
             sizes: product.sizes || [],
             colors: product.colors || []
-        };
-
-        res.json(formattedProduct);
+        });
     } catch (error) {
-        console.error('Get product error:', error);
         res.status(500).json({ message: 'Server error fetching product' });
     }
 };
@@ -55,7 +45,6 @@ const getProductById = async (req, res) => {
 const createProduct = async (req, res) => {
     try {
         const { product_name, description, price, stock_quantity, category_id } = req.body;
-
         if (!product_name || price === undefined || stock_quantity === undefined) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
@@ -69,27 +58,20 @@ const createProduct = async (req, res) => {
         }
 
         const newProduct = await Product.create({
-            product_name,
-            description,
-            price: parseFloat(price),
+            product_name, description, price: parseFloat(price),
             stock_quantity: parseInt(stock_quantity),
             category_id: category_id ? parseInt(category_id) : null,
             image_urls: imageUrls
         });
 
-        const formattedProduct = {
-            ...newProduct,
-            price: parseFloat(newProduct.price) || 0,
-            stock_quantity: parseInt(newProduct.stock_quantity) || 0,
-            image_urls: newProduct.image_urls || []
-        };
+        // LOG THE ACTION
+        await pool.query(
+            'INSERT INTO admin_logs (admin_id, action, details) VALUES ($1, $2, $3)',
+            [req.user.userId, 'CREATE_PRODUCT', `Created product: ${product_name} (ID: ${newProduct.product_id})`]
+        );
 
-        res.status(201).json({
-            message: 'Product created successfully',
-            product: formattedProduct
-        });
+        res.status(201).json({ message: 'Product created successfully', product: newProduct });
     } catch (error) {
-        console.error('Create product error:', error);
         res.status(500).json({ message: 'Server error creating product' });
     }
 };
@@ -97,12 +79,8 @@ const createProduct = async (req, res) => {
 const updateProduct = async (req, res) => {
     try {
         const productId = req.params.id;
-        const { product_name, description, price, stock_quantity, category_id } = req.body;
-
         const existingProduct = await Product.getById(productId);
-        if (!existingProduct) {
-            return res.status(404).json({ message: 'Product not found' });
-        }
+        if (!existingProduct) return res.status(404).json({ message: 'Product not found' });
 
         let imageUrls = existingProduct.image_urls || [];
         if (req.files && req.files.length > 0) {
@@ -112,61 +90,54 @@ const updateProduct = async (req, res) => {
             }
         }
 
-        const updates = {};
-        if (product_name) updates.product_name = product_name;
-        if (description !== undefined) updates.description = description;
-        if (price !== undefined) updates.price = parseFloat(price);
-        if (stock_quantity !== undefined) updates.stock_quantity = parseInt(stock_quantity);
-        if (category_id !== undefined) updates.category_id = category_id ? parseInt(category_id) : null;
-        updates.image_urls = imageUrls;
+        const updates = { ...req.body, image_urls: imageUrls };
+        if (updates.price) updates.price = parseFloat(updates.price);
+        if (updates.stock_quantity) updates.stock_quantity = parseInt(updates.stock_quantity);
+        if (updates.category_id) updates.category_id = parseInt(updates.category_id);
 
         const updatedProduct = await Product.update(productId, updates);
 
-        if (!updatedProduct) {
-            return res.status(404).json({ message: 'Product not found' });
-        }
+        // LOG THE ACTION
+        await pool.query(
+            'INSERT INTO admin_logs (admin_id, action, details) VALUES ($1, $2, $3)',
+            [req.user.userId, 'UPDATE_PRODUCT', `Updated product: ${updatedProduct.product_name} (ID: ${productId})`]
+        );
 
-        const formattedProduct = {
-            ...updatedProduct,
-            price: parseFloat(updatedProduct.price) || 0,
-            stock_quantity: parseInt(updatedProduct.stock_quantity) || 0,
-            image_urls: updatedProduct.image_urls || []
-        };
-
-        res.json({
-            message: 'Product updated successfully',
-            product: formattedProduct
-        });
+        res.json({ message: 'Product updated successfully', product: updatedProduct });
     } catch (error) {
-        console.error('Update product error:', error);
         res.status(500).json({ message: 'Server error updating product' });
     }
 };
 
 const deleteProduct = async (req, res) => {
     try {
-        const productId = req.params.id;
+        const deletedProduct = await Product.delete(req.params.id);
+        if (!deletedProduct) return res.status(404).json({ message: 'Product not found' });
 
-        const deletedProduct = await Product.delete(productId);
+        // LOG THE ACTION
+        await pool.query(
+            'INSERT INTO admin_logs (admin_id, action, details) VALUES ($1, $2, $3)',
+            [req.user.userId, 'DELETE_PRODUCT', `Deleted product: ${deletedProduct.product_name} (ID: ${deletedProduct.product_id})`]
+        );
 
-        if (!deletedProduct) {
-            return res.status(404).json({ message: 'Product not found' });
-        }
-
-        res.json({
-            message: 'Product deleted successfully',
-            product: deletedProduct
-        });
+        res.json({ message: 'Product deleted successfully', product: deletedProduct });
     } catch (error) {
-        console.error('Delete product error:', error);
         res.status(500).json({ message: 'Server error deleting product' });
     }
 };
 
-module.exports = {
-    getProducts,
-    getProductById,
-    createProduct,
-    updateProduct,
-    deleteProduct
+const getAuditLogs = async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT a.*, u.full_name 
+            FROM admin_logs a
+            JOIN users u ON a.admin_id = u.user_id
+            ORDER BY a.created_at DESC
+        `);
+        res.json(result.rows);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching logs' });
+    }
 };
+
+module.exports = { getProducts, getProductById, createProduct, updateProduct, deleteProduct, getAuditLogs };

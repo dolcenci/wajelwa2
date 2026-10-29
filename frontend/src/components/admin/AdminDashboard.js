@@ -60,22 +60,20 @@ const AdminDashboard = () => {
             <div className="max-w-7xl mx-auto">
                 <div className="flex flex-wrap justify-between items-center mb-8 gap-4">
                     <div>
-                        <h1 className="text-3xl font-bold text-white">
-                            Admin Dashboard
-                        </h1>
-                        <p className="text-white mt-1">
-                            Manage your Wajelwa product catalog
-                        </p>
+                        <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
+                        <p className="text-white mt-1">Manage your Wajelwa product catalog</p>
                     </div>
-                    <Link
-                        to="/admin/add-product"
-                        className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-                    >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                        Add New Product
-                    </Link>
+                    <div className="flex gap-4">
+                        <Link to="/admin/logs" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold shadow-lg transition-all">
+                            Audit Logs
+                        </Link>
+                        <Link to="/admin/add-product" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold shadow-lg transition-all transform hover:scale-105">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            Add New Product
+                        </Link>
+                    </div>
                 </div>
 
                 {error && (
@@ -91,35 +89,25 @@ const AdminDashboard = () => {
                                 <p className="text-sm text-white font-medium">Total Products</p>
                                 <p className="text-3xl font-bold text-white mt-1">{products.length}</p>
                             </div>
-                            <div className="w-12 h-12 rounded-xl bg-purple-900/50 flex items-center justify-center text-2xl">
-                                📦
-                            </div>
+                            <div className="w-12 h-12 rounded-xl bg-purple-900/50 flex items-center justify-center text-2xl">📦</div>
                         </div>
                     </div>
                     <div className="bg-zinc-900 rounded-2xl shadow-lg p-6 border border-zinc-800">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-white font-medium">In Stock</p>
-                                <p className="text-3xl font-bold text-white mt-1">
-                                    {products.filter(p => p.stock_quantity > 0).length}
-                                </p>
+                                <p className="text-3xl font-bold text-white mt-1">{products.filter(p => p.stock_quantity > 0).length}</p>
                             </div>
-                            <div className="w-12 h-12 rounded-xl bg-green-900/50 flex items-center justify-center text-2xl">
-                                ✅
-                            </div>
+                            <div className="w-12 h-12 rounded-xl bg-green-900/50 flex items-center justify-center text-2xl">✅</div>
                         </div>
                     </div>
                     <div className="bg-zinc-900 rounded-2xl shadow-lg p-6 border border-zinc-800">
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm text-white font-medium">Out of Stock</p>
-                                <p className="text-3xl font-bold text-white mt-1">
-                                    {products.filter(p => p.stock_quantity === 0).length}
-                                </p>
+                                <p className="text-3xl font-bold text-white mt-1">{products.filter(p => p.stock_quantity === 0).length}</p>
                             </div>
-                            <div className="w-12 h-12 rounded-xl bg-red-900/50 flex items-center justify-center text-2xl">
-                                ⚠️
-                            </div>
+                            <div className="w-12 h-12 rounded-xl bg-red-900/50 flex items-center justify-center text-2xl">⚠️</div>
                         </div>
                     </div>
                 </div>
@@ -139,51 +127,25 @@ const AdminDashboard = () => {
                             <tbody className="divide-y divide-zinc-700">
                             {products.length === 0 ? (
                                 <tr>
-                                    <td colSpan="5" className="px-6 py-12 text-center text-white">
-                                        No products yet. Add your first product!
-                                    </td>
+                                    <td colSpan="5" className="px-6 py-12 text-center text-white">No products yet. Add your first product!</td>
                                 </tr>
                             ) : (
                                 products.map((product) => (
                                     <tr key={product.product_id} className="hover:bg-zinc-800/70 transition-colors">
                                         <td className="px-6 py-4">
-                                            <img
-                                                src={product.image_urls && product.image_urls.length > 0
-                                                    ? product.image_urls[0]
-                                                    : 'https://via.placeholder.com/50x50?text=No+Img'
-                                                }
-                                                alt={product.product_name}
-                                                className="w-14 h-14 object-cover rounded-lg shadow"
-                                            />
+                                            <img src={product.image_urls && product.image_urls.length > 0 ? product.image_urls[0] : 'https://via.placeholder.com/50x50?text=No+Img'} alt={product.product_name} className="w-14 h-14 object-cover rounded-lg shadow" />
                                         </td>
-                                        <td className="px-6 py-4 text-sm font-medium text-white">
-                                            {product.product_name}
-                                        </td>
-                                        <td className="px-6 py-4 text-sm font-semibold text-white">
-                                            R{formatPrice(product.price)}
-                                        </td>
+                                        <td className="px-6 py-4 text-sm font-medium text-white">{product.product_name}</td>
+                                        <td className="px-6 py-4 text-sm font-semibold text-white">R{formatPrice(product.price)}</td>
                                         <td className="px-6 py-4">
-                                                <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                                                    product.stock_quantity > 0
-                                                        ? 'bg-green-900/40 text-white'
-                                                        : 'bg-red-900/40 text-white'
-                                                }`}>
+                                                <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${product.stock_quantity > 0 ? 'bg-green-900/40 text-white' : 'bg-red-900/40 text-white'}`}>
                                                     {product.stock_quantity > 0 ? `${product.stock_quantity} units` : 'Out of Stock'}
                                                 </span>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex gap-2">
-                                                <Link
-                                                    to={`/admin/edit-product/${product.product_id}`}
-                                                    className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-blue-500 hover:bg-blue-600 transition-colors"
-                                                >
-                                                    Edit
-                                                </Link>
-                                                <button
-                                                    onClick={() => handleDelete(product.product_id)}
-                                                    disabled={deleting === product.product_id}
-                                                    className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-50"
-                                                >
+                                                <Link to={`/admin/edit-product/${product.product_id}`} className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-blue-500 hover:bg-blue-600 transition-colors">Edit</Link>
+                                                <button onClick={() => handleDelete(product.product_id)} disabled={deleting === product.product_id} className="px-4 py-2 rounded-lg text-sm font-semibold text-white bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-50">
                                                     {deleting === product.product_id ? 'Deleting...' : 'Delete'}
                                                 </button>
                                             </div>
