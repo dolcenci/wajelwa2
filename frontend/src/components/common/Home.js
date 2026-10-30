@@ -133,7 +133,8 @@ const Home = () => {
                 ) : (
                     <div className="home-product-grid">
                         {products.map((product) => (
-                            <Link to={`/product/${product.product_id}`} className="home-product-card" key={product.product_id}>
+                            /* FIXED: Added 's' to /products/ */
+                            <Link to={`/products/${product.product_id}`} className="home-product-card" key={product.product_id}>
                                 <div className="home-product-image">
                                     <img
                                         src={product.image_urls && product.image_urls.length > 0 ? product.image_urls[0] : 'https://via.placeholder.com/400x400?text=No+Image'}
