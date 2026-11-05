@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { productService } from '../../services/api';
 
 const Home = () => {
-    const navigate = useNavigate();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -133,7 +132,6 @@ const Home = () => {
                 ) : (
                     <div className="home-product-grid">
                         {products.map((product) => (
-                            /* FIXED: Added 's' to /products/ */
                             <Link to={`/products/${product.product_id}`} className="home-product-card" key={product.product_id}>
                                 <div className="home-product-image">
                                     <img

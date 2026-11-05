@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { cartService, orderService } from '../../services/api';
+import { cartService } from '../../services/api';
 
 const Cart = () => {
     const navigate = useNavigate();

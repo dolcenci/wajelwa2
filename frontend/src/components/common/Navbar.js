@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import DarkModeToggle from './DarkModeToggle';
 
 const Navbar = () => {
     const navigate = useNavigate();
@@ -16,66 +17,38 @@ const Navbar = () => {
 
     return (
         <header className="navbar">
-
             <div className="nav-container">
-<div className="nav-actions">
-                {/* LOGO / HOME */}
-                <Link to="/" className="nav-logo">
-                   <img src="/images/wajelwaLogo.png" alt="Wajelwa" className="nav-logo-image"/>
-                </Link>
+                <div className="nav-actions">
+                    <Link to="/" className="nav-logo">
+                        <img src="/images/wajelwaLogo.png" alt="Wajelwa" className="nav-logo-image"/>
+                    </Link>
 
-                {/* NAVIGATION */}
-               
-                    {/* SHOP DROPDOWN */}
                     <div
                         className="nav-dropdown"
                         onMouseEnter={() => setShopOpen(true)}
                         onMouseLeave={() => setShopOpen(false)}
                     >
                         <button className="nav-item shop-button">
-                            Shop 
-                            <span className="dropdown-arrow">⌄</span>
+                            Shop <span className="dropdown-arrow">⌄</span>
                         </button>
 
                         {shopOpen && (
                             <div className="dropdown-menu">
-
-                                <Link to="/products">
-                                    All Products
-                                </Link>
-
-                                <Link to="/products?category=1">
-                                    T-Shirts
-                                </Link>
-
-                                <Link to="/products?category=2">
-                                    Hoodies
-                                </Link>
-
-                                <Link to="/products?category=3">
-                                    Designer Prints
-                                </Link>
-
+                                <Link to="/products">All Products</Link>
+                                <Link to="/products?category=1">T-Shirts</Link>
+                                <Link to="/products?category=2">Hoodies</Link>
+                                <Link to="/products?category=3">Designer Prints</Link>
                             </div>
                         )}
                     </div>
 
-                    <Link to="/about" className="nav-item">
-                        About Us
-                    </Link>
+                    <Link to="/about" className="nav-item">About Us</Link>
+                    <Link to="/support" className="nav-item">Support</Link>
+                </div>
 
-                    <Link to="/support" className="nav-item">
-                        Support
-                    </Link>
-</div>
-                
-
-                {/* RIGHT SIDE ICONS */}
                 <div className="nav-actions">
-<Link to="/wishlist">
-    ♡ 
-</Link>
-                    {/* SEARCH */}
+                    <Link to="/wishlist">♡</Link>
+
                     <button
                         className="nav-icon"
                         aria-label="Search"
@@ -87,13 +60,10 @@ const Navbar = () => {
                         </svg>
                     </button>
 
-                    {/* ACCOUNT */}
                     <button
                         className="nav-icon"
                         aria-label="Account"
-                        onClick={() =>
-                            navigate(isAuthenticated ? '/profile' : '/login')
-                        }
+                        onClick={() => navigate(isAuthenticated ? '/profile' : '/login')}
                     >
                         <svg viewBox="0 0 24 24">
                             <circle cx="12" cy="8" r="4"></circle>
@@ -101,7 +71,6 @@ const Navbar = () => {
                         </svg>
                     </button>
 
-                    {/* CART */}
                     <button
                         className="nav-icon cart-icon"
                         aria-label="Cart"
@@ -113,9 +82,7 @@ const Navbar = () => {
                             <circle cx="17" cy="20" r="1"></circle>
                         </svg>
                     </button>
-
                 </div>
-
             </div>
         </header>
     );
