@@ -12,21 +12,18 @@ const Cart = () => {
 
     useEffect(() => {
         const token = localStorage.getItem('token');
-
         if (!token) {
             navigate('/login');
             return;
         }
-
         fetchCart();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const fetchCart = async () => {
         try {
             setLoading(true);
-
             const response = await cartService.getCart();
-
             setCartItems(response.data.items || []);
         } catch (err) {
             console.error(err);
@@ -38,19 +35,13 @@ const Cart = () => {
 
     const handleUpdateQuantity = async (cartItemId, newQuantity) => {
         if (newQuantity < 1) return;
-
         try {
             setUpdating(true);
-
-            await cartService.updateItem(cartItemId, {
-                quantity: newQuantity
-            });
-
+            await cartService.updateItem(cartItemId, { quantity: newQuantity });
             await fetchCart();
         } catch (err) {
             console.error(err);
             setError('Failed to update quantity');
-
             setTimeout(() => setError(''), 3000);
         } finally {
             setUpdating(false);
@@ -60,52 +51,34 @@ const Cart = () => {
     const handleRemoveItem = async (cartItemId) => {
         try {
             setUpdating(true);
-
             await cartService.removeItem(cartItemId);
-
             await fetchCart();
         } catch (err) {
             console.error(err);
             setError('Failed to remove item');
-
             setTimeout(() => setError(''), 3000);
         } finally {
             setUpdating(false);
         }
     };
 
-    
-const handleCheckout = () => {
-    if (cartItems.length === 0) {
-        setError('Your cart is empty.');
-        return;
-    }
-
-
-    navigate('/checkout');
-};
-
+    const handleCheckout = () => {
+        if (cartItems.length === 0) {
+            setError('Your cart is empty.');
+            return;
+        }
+        navigate('/checkout');
+    };
 
     const getPriceAsNumber = (price) => {
-        if (price === undefined || price === null) {
-            return 0;
-        }
-
-        const number =
-            typeof price === 'string'
-                ? parseFloat(price)
-                : price;
-
+        if (price === undefined || price === null) return 0;
+        const number = typeof price === 'string' ? parseFloat(price) : price;
         return isNaN(number) ? 0 : number;
     };
 
     const calculateTotal = () => {
         return cartItems.reduce((total, item) => {
-            return (
-                total +
-                getPriceAsNumber(item.price) *
-                (item.quantity || 0)
-            );
+            return total + getPriceAsNumber(item.price) * (item.quantity || 0);
         }, 0);
     };
 
@@ -124,289 +97,115 @@ const handleCheckout = () => {
 
     return (
         <div className="cart-page">
-
             <div className="cart-container">
-
-                {/* PAGE HEADER */}
                 <div className="cart-header">
-                    <p style={{ color: '#ffffff' }} className="cart-eyebrow">
-                        YOUR SHOPPING BAG
-                    </p>
-
-                    <h1>
-                        Shopping Cart
-                    </h1>
-
+                    <p className="cart-eyebrow">YOUR SHOPPING BAG</p>
+                    <h1>Shopping Cart</h1>
                 </div>
 
-                {/* ERROR MESSAGE */}
-                {error && (
-                    <div className="cart-error">
-                        {error}
-                    </div>
-                )}
+                {error && <div className="cart-error">{error}</div>}
 
-                {/* EMPTY CART */}
                 {cartItems.length === 0 ? (
-
                     <div className="empty-cart">
-
-                        <div className="empty-cart-icon">
-                            🛍
-                        </div>
-
-                        <h2>
-                            Your cart is empty
-                        </h2>
-
-                        <p>
-                            Looks like you haven't added anything
-                            to your cart yet.
-                        </p>
-
-                        <Link
-                            to="/products"
-                            className="continue-shopping-btn"
-                        >
+                        <div className="empty-cart-icon">🛍</div>
+                        <h2>Your cart is empty</h2>
+                        <p>Looks like you haven't added anything to your cart yet.</p>
+                        <Link to="/products" className="continue-shopping-btn">
                             Continue Shopping
                         </Link>
-
                     </div>
-
                 ) : (
-
                     <div className="cart-layout">
-
-                        {/* CART ITEMS */}
                         <div className="cart-items-section">
-
                             <div className="cart-items-header">
-                                <h2 style={{ color: '#ffffff' }}>
-                                    Your Items
-                                </h2>
-
-                                <span style={{ color: '#ffffff' }}>
-                                    {cartItems.length}{' '}
-                                    {cartItems.length === 1
-                                        ? 'item'
-                                        : 'items'}
-                                </span>
+                                <h2>Your Items</h2>
+                                <span>{cartItems.length} {cartItems.length === 1 ? 'item' : 'items'}</span>
                             </div>
 
                             <div className="cart-items">
-
                                 {cartItems.map((item) => {
-
-                                    const price =
-                                        getPriceAsNumber(
-                                            item.price
-                                        );
-
-                                    const image =
-                                        item.image_urls &&
-                                        item.image_urls.length > 0
-                                            ? item.image_urls[0]
-                                            : null;
+                                    const price = getPriceAsNumber(item.price);
+                                    const image = item.image_urls && item.image_urls.length > 0 ? item.image_urls[0] : null;
 
                                     return (
-                                        <div
-                                            key={item.cart_item_id}
-                                            className="cart-item"
-                                        >
-
-                                            {/* PRODUCT IMAGE */}
+                                        <div key={item.cart_item_id} className="cart-item">
                                             <div className="cart-item-image">
-
                                                 {image ? (
-                                                    <img
-                                                        src={image}
-                                                        alt={
-                                                            item.product_name ||
-                                                            'Product'
-                                                        }
-                                                    />
+                                                    <img src={image} alt={item.product_name || 'Product'} />
                                                 ) : (
-                                                    <div className="cart-image-placeholder">
-                                                        WAJELWA
-                                                    </div>
+                                                    <div className="cart-image-placeholder">WAJELWA</div>
                                                 )}
-
                                             </div>
 
-                                            {/* PRODUCT INFO */}
                                             <div className="cart-item-info">
-
-                                                <h3>
-                                                    {item.product_name ||
-                                                        'Unnamed Product'}
-                                                </h3>
-
-                                                {item.color && (
-                                                    <p>
-                                                        Colour:{' '}
-                                                        <span>
-                                                            {item.color}
-                                                        </span>
-                                                    </p>
-                                                )}
-
-                                                {item.size && (
-                                                    <p>
-                                                        Size:{' '}
-                                                        <span>
-                                                            {item.size}
-                                                        </span>
-                                                    </p>
-                                                )}
-
-                                                <p className="cart-item-price">
-                                                    R
-                                                    {price.toFixed(2)}
-                                                </p>
-
+                                                <h3>{item.product_name || 'Unnamed Product'}</h3>
+                                                {item.color && <p>Colour: <span>{item.color}</span></p>}
+                                                {item.size && <p>Size: <span>{item.size}</span></p>}
+                                                <p className="cart-item-price">R{price.toFixed(2)}</p>
                                             </div>
 
-                                            {/* QUANTITY */}
                                             <div className="cart-item-actions">
-
                                                 <div className="quantity-control">
-
                                                     <button
-                                                        onClick={() =>
-                                                            handleUpdateQuantity(
-                                                                item.cart_item_id,
-                                                                (item.quantity ||
-                                                                    0) - 1
-                                                            )
-                                                        }
+                                                        onClick={() => handleUpdateQuantity(item.cart_item_id, (item.quantity || 0) - 1)}
                                                         disabled={updating || Number(item.quantity) <= 1}
                                                     >
                                                         −
                                                     </button>
-
-                                                    <span>
-                                                        {item.quantity || 0}
-                                                    </span>
-
+                                                    <span>{item.quantity || 0}</span>
                                                     <button
-                                                        onClick={() =>
-                                                            handleUpdateQuantity(
-                                                                item.cart_item_id,
-                                                                (item.quantity ||
-                                                                    0) + 1
-                                                            )
-                                                        }
-                                                        disabled={
-    updating ||
-    Number(item.quantity) >= Number(item.stock_quantity)
-}
+                                                        onClick={() => handleUpdateQuantity(item.cart_item_id, (item.quantity || 0) + 1)}
+                                                        disabled={updating || Number(item.quantity) >= Number(item.stock_quantity)}
                                                     >
                                                         +
                                                     </button>
-
                                                 </div>
-
                                                 <button
                                                     className="remove-item"
-                                                    onClick={() =>
-                                                        handleRemoveItem(
-                                                            item.cart_item_id
-                                                        )
-                                                    }
+                                                    onClick={() => handleRemoveItem(item.cart_item_id)}
                                                     disabled={updating}
                                                 >
                                                     Remove
                                                 </button>
-
                                             </div>
-
                                         </div>
                                     );
                                 })}
-
                             </div>
 
-                            {/* CONTINUE SHOPPING */}
-                            <Link
-                                to="/products"
-                                className="back-to-shop"
-                            >
+                            <Link to="/products" className="back-to-shop">
                                 ← Continue Shopping
                             </Link>
-
                         </div>
 
-                        {/* ORDER SUMMARY */}
                         <div className="cart-summary">
-
                             <div className="summary-card">
-
-                                <p className="summary-eyebrow">
-                                    ORDER SUMMARY
-                                </p>
-
-                                <h2>
-                                    Your Order
-                                </h2>
-
+                                <p className="summary-eyebrow">ORDER SUMMARY</p>
+                                <h2>Your Order</h2>
                                 <div className="summary-line">
-                                    <span>
-                                        Subtotal
-                                    </span>
-
-                                    <span>
-                                        R{subtotal.toFixed(2)}
-                                    </span>
+                                    <span>Subtotal</span>
+                                    <span>R{subtotal.toFixed(2)}</span>
                                 </div>
-
                                 <div className="summary-line">
-                                    <span>
-                                        Shipping
-                                    </span>
-
-                                    <span>
-                                        R{shipping.toFixed(2)}
-                                    </span>
+                                    <span>Shipping</span>
+                                    <span>R{shipping.toFixed(2)}</span>
                                 </div>
-
                                 <div className="summary-divider"></div>
-
                                 <div className="summary-total">
-                                    <span>
-                                        Total
-                                    </span>
-
-                                    <span>
-                                        R{total.toFixed(2)}
-                                    </span>
+                                    <span>Total</span>
+                                    <span>R{total.toFixed(2)}</span>
                                 </div>
-
-                                <button
-                                    className="checkout-btn"
-                                    onClick={handleCheckout}
-                                    disabled={updating}
-                                >
-                                    {updating
-                                        ? 'PROCESSING...'
-                                        : 'PROCEED TO CHECKOUT'}
+                                <button className="checkout-btn" onClick={handleCheckout} disabled={updating}>
+                                    {updating ? 'PROCESSING...' : 'PROCEED TO CHECKOUT'}
                                 </button>
-
-                                <p className="secure-checkout">
-                                    Secure checkout
-                                </p>
-
+                                <p className="secure-checkout">Secure checkout</p>
                             </div>
-
                         </div>
-
                     </div>
                 )}
-
             </div>
-
         </div>
     );
 };
 
 export default Cart;
-

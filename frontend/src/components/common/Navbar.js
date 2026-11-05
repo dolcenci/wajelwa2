@@ -1,19 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import DarkModeToggle from './DarkModeToggle';
 
 const Navbar = () => {
     const navigate = useNavigate();
     const [shopOpen, setShopOpen] = useState(false);
-
-    const user = JSON.parse(localStorage.getItem('user'));
-    const isAuthenticated = !!localStorage.getItem('token');
-
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        navigate('/login');
-    };
 
     return (
         <header className="navbar">
@@ -49,33 +39,21 @@ const Navbar = () => {
                 <div className="nav-actions">
                     <Link to="/wishlist">♡</Link>
 
-                    <button
-                        className="nav-icon"
-                        aria-label="Search"
-                        onClick={() => navigate('/products')}
-                    >
+                    <button className="nav-icon" aria-label="Search" onClick={() => navigate('/products')}>
                         <svg viewBox="0 0 24 24">
                             <circle cx="11" cy="11" r="7"></circle>
                             <line x1="16.5" y1="16.5" x2="22" y2="22"></line>
                         </svg>
                     </button>
 
-                    <button
-                        className="nav-icon"
-                        aria-label="Account"
-                        onClick={() => navigate(isAuthenticated ? '/profile' : '/login')}
-                    >
+                    <button className="nav-icon" aria-label="Account" onClick={() => navigate(localStorage.getItem('token') ? '/profile' : '/login')}>
                         <svg viewBox="0 0 24 24">
                             <circle cx="12" cy="8" r="4"></circle>
                             <path d="M4 21c0-4 3.5-7 8-7s8 3 8 7"></path>
                         </svg>
                     </button>
 
-                    <button
-                        className="nav-icon cart-icon"
-                        aria-label="Cart"
-                        onClick={() => navigate('/cart')}
-                    >
+                    <button className="nav-icon cart-icon" aria-label="Cart" onClick={() => navigate('/cart')}>
                         <svg viewBox="0 0 24 24">
                             <path d="M3 4h2l2 12h10l3-9H6"></path>
                             <circle cx="9" cy="20" r="1"></circle>

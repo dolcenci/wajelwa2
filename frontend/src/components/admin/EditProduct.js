@@ -16,6 +16,7 @@ const EditProduct = () => {
 
     useEffect(() => {
         fetchProduct();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
     const fetchProduct = async () => {
@@ -84,7 +85,6 @@ const EditProduct = () => {
         }
     };
 
-    // INLINE STYLES TO GUARANTEE VISIBILITY
     const labelStyle = { display: 'block', fontWeight: 'bold', marginBottom: '8px', color: '#111111' };
     const inputStyle = {
         width: '100%',
