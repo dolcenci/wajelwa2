@@ -2,7 +2,6 @@ import axios from 'axios';
 
 // Create axios instance with base URL
 const API = axios.create({
-    // REPLACE THIS WITH YOUR ACTUAL RENDER URL + /api
     baseURL: 'https://wajelwa2.onrender.com/api',
     headers: {
         'Content-Type': 'application/json',
@@ -74,6 +73,11 @@ export const wishlistService = {
 export const paymentService = {
     createPaymentIntent: (orderId) => API.post('/payments/create-payment-intent', { orderId }),
     confirmPayment: (paymentIntentId) => API.post('/payments/confirm-payment', { paymentIntentId }),
+};
+
+// Chatbot Services (This was missing)
+export const chatbotService = {
+    sendMessage: (message) => API.post('/chatbot/message', { message })
 };
 
 export default API;
